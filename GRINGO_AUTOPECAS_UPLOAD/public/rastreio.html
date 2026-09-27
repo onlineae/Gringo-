@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rastreamento de Encomendas | Gringo Autopeças</title>
+  <meta name="description" content="Acompanhe o status e a entrega do seu pedido na Gringo Autopeças em tempo real.">
+
+  <link rel="icon" href="/images/logo.jpg" type="image/jpeg">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gringo: {
+              blue: '#0072CE',
+              'blue-light': '#0099FF',
+              orange: '#FF6B00',
+              'orange-light': '#FF8533',
+              dark: '#0A0E1A',
+              card: '#121829',
+              border: '#1E293B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-carbon text-slate-100 min-h-screen flex flex-col antialiased">
+
+  <!-- Header -->
+  <header class="bg-gringo-dark/95 backdrop-blur-md border-b border-gringo-border sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3">
+        <img src="/images/logo-gringo.png" alt="Gringo Autopeças" class="h-10 w-auto object-contain">
+        <div>
+          <span class="text-xl font-black italic text-white font-heading">GRINGO <span class="text-gringo-orange">AUTOPEÇAS</span></span>
+          <span class="block text-[10px] text-gringo-blue-light font-bold uppercase tracking-wider">Sistema de Rastreio</span>
+        </div>
+      </a>
+
+      <div class="flex items-center gap-3">
+        <a href="/" class="text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition flex items-center gap-1.5">
+          <i class="fa-solid fa-arrow-left"></i> Voltar à Loja
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-grow max-w-4xl w-full mx-auto px-4 sm:px-6 py-10 sm:py-14">
+    
+    <!-- Title & Description -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gringo-blue/20 text-gringo-blue-light text-xs font-bold uppercase mb-2">
+        <i class="fa-solid fa-truck-fast"></i> Logística & Envios
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-black text-white font-heading">
+        RASTREAR ENCOMENDA
+      </h1>
+      <p class="text-slate-400 text-sm mt-1 max-w-lg mx-auto">
+        Digite o código de rastreamento enviado pelo nosso time para acompanhar a movimentação do seu pedido.
+      </p>
+    </div>
+
+    <!-- Search Box -->
+    <div class="bg-gringo-card border-2 border-gringo-border rounded-2xl p-6 shadow-2xl mb-8">
+      <form id="trackingSearchForm" onsubmit="handleSearch(event)" class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-grow">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+            <i class="fa-solid fa-barcode text-lg"></i>
+          </div>
+          <input 
+            type="text" 
+            id="trackingInput" 
+            placeholder="Exemplo: GR123456789BR" 
+            required 
+            class="w-full pl-11 pr-4 py-3.5 bg-slate-900 border border-gringo-border rounded-xl text-white text-base sm:text-lg uppercase tracking-wider focus:outline-none focus:border-gringo-orange placeholder-slate-600 transition"
+          >
+        </div>
+        <button 
+          type="submit" 
+          id="searchBtn"
+          class="bg-gradient-to-r from-gringo-orange to-gringo-orange-dark hover:from-gringo-orange-light hover:to-gringo-orange text-white font-bold px-8 py-3.5 rounded-xl shadow-lg shadow-gringo-orange/30 transition flex items-center justify-center gap-2 whitespace-nowrap"
+        >
+          <i class="fa-solid fa-magnifying-glass"></i> Consultar
+        </button>
+      </form>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-gringo-orange border-t-transparent"></div>
+      <p class="text-slate-400 text-sm mt-3 font-semibold">Consultando base logística...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="hidden bg-red-950/40 border border-red-800 text-red-200 p-6 rounded-2xl text-center mb-8">
+      <i class="fa-solid fa-circle-exclamation text-3xl text-red-500 mb-2"></i>
+      <h3 class="text-lg font-bold text-white">Código Não Localizado</h3>
+      <p id="errorMessage" class="text-xs sm:text-sm text-red-300 mt-1 max-w-md mx-auto">
+        Não encontramos nenhum envio associado a este código. Verifique se digitou corretamente ou solicite o código ao nosso atendente.
+      </p>
+      <div class="mt-4">
+        <a id="helpWhatsappBtn" href="https://wa.me/5551993687877" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 border border-red-700/60 rounded-lg text-xs font-semibold text-white hover:bg-slate-800 transition">
+          <i class="fa-brands fa-whatsapp text-emerald-400"></i> Falar com Suporte no WhatsApp
+        </a>
+      </div>
+    </div>
+
+    <!-- Tracking Results Container -->
+    <div id="resultState" class="hidden space-y-6">
+      
+      <!-- Top Overview Card -->
+      <div class="bg-gringo-card border border-gringo-border rounded-2xl p-6 shadow-xl relative overflow-hidden">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gringo-border pb-4">
+          <div>
+            <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Código de Rastreamento</span>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span id="resTrackingCode" class="text-2xl font-black text-white tracking-widest font-heading">GR000000000BR</span>
+              <button onclick="copyTrackingCode()" class="text-slate-400 hover:text-gringo-orange text-sm p-1" title="Copiar código">
+                <i class="fa-regular fa-copy"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="text-left sm:text-right">
+            <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Status Atual</span>
+            <div>
+              <span id="resStatusBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase bg-gringo-blue/20 text-gringo-blue-light border border-gringo-blue/40 mt-1">
+                <span class="w-2 h-2 rounded-full bg-gringo-blue-light animate-pulse"></span>
+                Pedido recebido
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 text-xs text-slate-300">
+          <div>
+            <strong class="text-slate-400 block mb-0.5">Destino:</strong>
+            <span id="resDestination" class="text-white font-semibold text-sm">--</span>
+          </div>
+          <div>
+            <strong class="text-slate-400 block mb-0.5">Data de Emissão:</strong>
+            <span id="resCreatedAt" class="text-white font-semibold text-sm">--</span>
+            <span class="block text-[10px] text-slate-500 font-mono">Horário Oficial de Brasília</span>
+          </div>
+          <div>
+            <strong class="text-slate-400 block mb-0.5">Última Atualização:</strong>
+            <span id="resUpdatedAt" class="text-white font-semibold text-sm">--</span>
+            <span class="block text-[10px] text-slate-500 font-mono">Horário Oficial de Brasília</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step Progress Bar -->
+      <div class="bg-gringo-card border border-gringo-border rounded-2xl p-4 sm:p-6 shadow-xl">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-5 flex items-center gap-2">
+          <i class="fa-solid fa-bars-progress text-gringo-orange"></i> Progresso da Entrega
+        </h3>
+
+        <div class="grid grid-cols-4 gap-1.5 sm:gap-2 text-center text-xs">
+          <!-- Step 1 -->
+          <div id="step1" class="flex flex-col items-center">
+            <div class="step-icon w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-800 border-2 border-slate-700 text-slate-400 flex items-center justify-center text-xs sm:text-sm font-bold mb-1.5 sm:mb-2">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+            <span class="font-bold text-[10px] sm:text-xs text-slate-400">1. Recebido</span>
+          </div>
+
+          <!-- Step 2 -->
+          <div id="step2" class="flex flex-col items-center">
+            <div class="step-icon w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-800 border-2 border-slate-700 text-slate-400 flex items-center justify-center text-xs sm:text-sm font-bold mb-1.5 sm:mb-2">
+              <i class="fa-solid fa-box-open"></i>
+            </div>
+            <span class="font-bold text-[10px] sm:text-xs text-slate-400">2. Separação</span>
+          </div>
+
+          <!-- Step 3 -->
+          <div id="step3" class="flex flex-col items-center">
+            <div class="step-icon w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-800 border-2 border-slate-700 text-slate-400 flex items-center justify-center text-xs sm:text-sm font-bold mb-1.5 sm:mb-2">
+              <i class="fa-solid fa-truck-fast"></i>
+            </div>
+            <span class="font-bold text-[10px] sm:text-xs text-slate-400">3. Em Trânsito</span>
+          </div>
+
+          <!-- Step 4 -->
+          <div id="step4" class="flex flex-col items-center">
+            <div class="step-icon w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-800 border-2 border-slate-700 text-slate-400 flex items-center justify-center text-xs sm:text-sm font-bold mb-1.5 sm:mb-2">
+              <i class="fa-solid fa-house-chimney"></i>
+            </div>
+            <span class="font-bold text-[10px] sm:text-xs text-slate-400">4. Entregue</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chronological History Timeline -->
+      <div class="bg-gringo-card border border-gringo-border rounded-2xl p-4 sm:p-6 shadow-xl">
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left text-gringo-blue-light"></i> Histórico de Checkpoints
+          </h3>
+          <span class="text-[10px] sm:text-xs text-slate-400 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-full font-mono flex items-center gap-1.5">
+            <i class="fa-regular fa-clock text-gringo-orange"></i> Horário Oficial de Brasília (UTC-3)
+          </span>
+        </div>
+
+        <div id="timelineContainer" class="relative pl-6 space-y-6 sm:space-y-8 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-700">
+          <!-- Dinamicamente preenchido -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-950 border-t border-gringo-border text-slate-500 text-xs py-6 text-center">
+    <p>© 2026 Gringo Autopeças • Gravataí/RS • Todos os direitos reservados.</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Formatação com Horário Oficial de Brasília
+    function formatDateBr(str) {
+      if (!str) return '--';
+      try {
+        const match = str.match(/(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+        if (match) {
+          const [_, y, m, d, h, min] = match;
+          return `${d}/${m}/${y} às ${h}:${min}`;
+        }
+        return str;
+      } catch (e) {
+        return str;
+      }
+    }
+
+    // Busca de Rastreio
+    async function handleSearch(e) {
+      if (e) e.preventDefault();
+      const code = document.getElementById('trackingInput').value.trim();
+      if (!code) return;
+
+      // Esconder estados
+      document.getElementById('errorState').classList.add('hidden');
+      document.getElementById('resultState').classList.add('hidden');
+      document.getElementById('loadingState').classList.remove('hidden');
+
+      try {
+        const res = await fetch(`/api/tracking/${encodeURIComponent(code)}`);
+        const json = await res.json();
+
+        document.getElementById('loadingState').classList.add('hidden');
+
+        if (!json.success || !json.data) {
+          document.getElementById('errorMessage').innerText = json.error || 'Código não localizado.';
+          document.getElementById('errorState').classList.remove('hidden');
+          return;
+        }
+
+        renderTracking(json.data);
+      } catch (err) {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('errorMessage').innerText = 'Erro ao conectar ao servidor. Tente novamente em instantes.';
+        document.getElementById('errorState').classList.remove('hidden');
+      }
+    }
+
+    function renderTracking(data) {
+      document.getElementById('resTrackingCode').innerText = data.tracking_code;
+      document.getElementById('resDestination').innerText = data.destination || 'Não informado';
+      document.getElementById('resCreatedAt').innerText = formatDateBr(data.created_at);
+      document.getElementById('resUpdatedAt').innerText = formatDateBr(data.updated_at);
+
+      // Status Badge
+      const statusBadge = document.getElementById('resStatusBadge');
+      statusBadge.innerText = data.status;
+
+      // Atualiza passos
+      updateStepProgress(data.status);
+
+      // Renderiza checkpoints em ordem decrescente (mais recente primeiro)
+      const container = document.getElementById('timelineContainer');
+      container.innerHTML = '';
+
+      const checkpoints = (data.checkpoints || []).slice().reverse();
+
+      checkpoints.forEach((cp, idx) => {
+        const isLatest = idx === 0;
+        const cpEl = document.createElement('div');
+        cpEl.className = 'relative flex items-start gap-4';
+
+        const dotClass = isLatest ? 'bg-gringo-orange border-white' : 'bg-slate-700 border-slate-500';
+        
+        cpEl.innerHTML = `
+          <div class="absolute -left-6 top-1.5 w-3.5 h-3.5 rounded-full border-2 ${dotClass}"></div>
+          <div class="flex-grow bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
+              <span class="text-sm font-bold ${isLatest ? 'text-gringo-orange-light' : 'text-white'}">
+                ${cp.status}
+              </span>
+              <span class="text-xs text-slate-400 font-mono">
+                ${formatDateBr(cp.timestamp)} <span class="text-[10px] text-slate-500 font-sans">(Horário de Brasília)</span>
+              </span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">${cp.description}</p>
+            <div class="text-[11px] text-slate-400 mt-2 flex items-center gap-1.5">
+              <i class="fa-solid fa-location-dot text-gringo-blue-light"></i>
+              <span>${cp.location}</span>
+            </div>
+          </div>
+        `;
+        container.appendChild(cpEl);
+      });
+
+      document.getElementById('resultState').classList.remove('hidden');
+    }
+
+    function updateStepProgress(status) {
+      const s = (status || '').toLowerCase();
+      
+      const s1 = document.getElementById('step1');
+      const s2 = document.getElementById('step2');
+      const s3 = document.getElementById('step3');
+      const s4 = document.getElementById('step4');
+
+      const activate = (el, bgClass, textClass) => {
+        const icon = el.querySelector('.step-icon');
+        icon.className = `step-icon w-10 h-10 rounded-full ${bgClass} text-white flex items-center justify-center text-sm font-bold mb-2 shadow-lg`;
+        el.querySelector('span').className = `font-bold ${textClass}`;
+      };
+
+      const reset = (el) => {
+        const icon = el.querySelector('.step-icon');
+        icon.className = 'step-icon w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 text-slate-400 flex items-center justify-center text-sm font-bold mb-2';
+        el.querySelector('span').className = 'font-bold text-slate-400';
+      };
+
+      reset(s1); reset(s2); reset(s3); reset(s4);
+
+      if (s.includes('recebido') || s.includes('criado')) {
+        activate(s1, 'bg-gringo-blue border-2 border-gringo-blue-light', 'text-gringo-blue-light');
+      } else if (s.includes('separação') || s.includes('embal')) {
+        activate(s1, 'bg-emerald-600', 'text-slate-300');
+        activate(s2, 'bg-gringo-orange border-2 border-gringo-orange-light', 'text-gringo-orange-light');
+      } else if (s.includes('trânsito') || s.includes('despachado') || s.includes('enviado') || s.includes('saiu')) {
+        activate(s1, 'bg-emerald-600', 'text-slate-300');
+        activate(s2, 'bg-emerald-600', 'text-slate-300');
+        activate(s3, 'bg-gringo-blue border-2 border-gringo-blue-light', 'text-gringo-blue-light');
+      } else if (s.includes('entregue')) {
+        activate(s1, 'bg-emerald-600', 'text-slate-300');
+        activate(s2, 'bg-emerald-600', 'text-slate-300');
+        activate(s3, 'bg-emerald-600', 'text-slate-300');
+        activate(s4, 'bg-emerald-600 border-2 border-emerald-400', 'text-emerald-400');
+      }
+    }
+
+    function copyTrackingCode() {
+      const code = document.getElementById('resTrackingCode').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('Código de rastreamento copiado para a área de transferência!');
+      });
+    }
+
+    // Auto-executa busca se houver parâmetro ?codigo= na URL
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const codeParam = urlParams.get('codigo');
+      if (codeParam) {
+        document.getElementById('trackingInput').value = codeParam;
+        handleSearch();
+      }
+    });
+  </script>
+</body>
+</html>

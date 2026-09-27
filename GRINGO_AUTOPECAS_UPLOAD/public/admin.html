@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo | Gringo Autopeças</title>
+
+  <link rel="icon" href="/images/logo.jpg" type="image/jpeg">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gringo: {
+              blue: '#0072CE',
+              'blue-light': '#0099FF',
+              orange: '#FF6B00',
+              'orange-light': '#FF8533',
+              dark: '#0A0E1A',
+              card: '#121829',
+              border: '#1E293B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-carbon text-slate-100 min-h-screen flex flex-col antialiased">
+
+  <!-- Login Overlay / Screen -->
+  <div id="loginScreen" class="fixed inset-0 z-50 bg-gringo-dark flex items-center justify-center p-4">
+    <div class="bg-gringo-card border-2 border-gringo-orange/80 rounded-2xl max-w-md w-full p-8 shadow-2xl relative glow-orange">
+      <div class="text-center mb-6">
+        <div class="h-16 mx-auto mb-3 flex items-center justify-center">
+          <img src="/images/logo-gringo.png" alt="Gringo Autopeças" class="h-14 w-auto object-contain drop-shadow">
+        </div>
+        <h2 class="text-2xl font-black text-white font-heading">ACESSO RESTRITO</h2>
+        <p class="text-xs text-slate-400 mt-1">Gestão de Logística Interna • Gringo Autopeças</p>
+      </div>
+
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Senha de Acesso Admin:</label>
+          <div class="relative">
+            <input 
+              type="password" 
+              id="adminPasswordInput" 
+              placeholder="••••••••" 
+              required 
+              class="w-full pl-4 pr-10 py-3 bg-slate-900 border border-gringo-border rounded-xl text-white text-base focus:outline-none focus:border-gringo-orange tracking-widest"
+            >
+            <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white">
+              <i id="eyeIcon" class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="loginError" class="hidden text-xs text-red-400 bg-red-950/60 border border-red-800 p-2.5 rounded-lg text-center font-medium">
+          Senha incorreta.
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-gradient-to-r from-gringo-orange to-gringo-orange-dark hover:from-gringo-orange-light hover:to-gringo-orange text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-right-to-bracket"></i> Entrar no Painel
+        </button>
+
+        <div class="text-center pt-2">
+          <a href="/" class="text-xs text-slate-400 hover:text-white transition">
+            <i class="fa-solid fa-arrow-left"></i> Voltar para a Loja Virtual
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Authenticated Admin Layout -->
+  <div id="adminLayout" class="hidden flex-col min-h-screen">
+    
+    <!-- Top Header -->
+    <header class="bg-gringo-dark/95 backdrop-blur-md border-b border-gringo-border sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <img src="/images/logo-gringo.png" alt="Gringo Autopeças" class="h-10 w-auto object-contain">
+          <div>
+            <span class="text-lg font-black text-white font-heading">PAINEL <span class="text-gringo-orange">LOGÍSTICA</span></span>
+            <span class="block text-[10px] text-emerald-400 font-bold uppercase"><i class="fa-solid fa-circle text-[8px]"></i> Admin Conectado</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-4">
+          <button onclick="openSettingsModal()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-gear text-gringo-orange"></i>
+            <span class="hidden sm:inline">Configurações & WhatsApp</span>
+          </button>
+
+          <a href="/" target="_blank" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <span class="hidden sm:inline">Ver Loja</span>
+          </a>
+
+          <button onclick="handleLogout()" class="px-3 py-2 bg-red-950/60 hover:bg-red-900 border border-red-800 rounded-lg text-xs font-semibold text-red-300 flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-power-off"></i>
+            <span class="hidden sm:inline">Sair</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 flex-grow space-y-6">
+      
+      <!-- Stats Overview -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-gringo-card border border-gringo-border p-4 rounded-xl">
+          <span class="text-xs text-slate-400 uppercase font-semibold">Total de Envios</span>
+          <div id="statTotal" class="text-2xl font-black text-white mt-1">0</div>
+        </div>
+        <div class="bg-gringo-card border border-gringo-border p-4 rounded-xl">
+          <span class="text-xs text-gringo-blue-light uppercase font-semibold">Pedidos Recebidos</span>
+          <div id="statReceived" class="text-2xl font-black text-gringo-blue-light mt-1">0</div>
+        </div>
+        <div class="bg-gringo-card border border-gringo-border p-4 rounded-xl">
+          <span class="text-xs text-gringo-orange uppercase font-semibold">Em Separação</span>
+          <div id="statSeparation" class="text-2xl font-black text-gringo-orange mt-1">0</div>
+        </div>
+        <div class="bg-gringo-card border border-gringo-border p-4 rounded-xl">
+          <span class="text-xs text-emerald-400 uppercase font-semibold">Em Trânsito / Enviados</span>
+          <div id="statTransit" class="text-2xl font-black text-emerald-400 mt-1">0</div>
+        </div>
+      </div>
+
+      <!-- Action Bar -->
+      <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 bg-gringo-card border border-gringo-border p-4 rounded-xl">
+        <div class="flex items-center gap-3">
+          <h2 class="text-lg font-bold text-white font-heading">Gestão de Envios & Rastreamentos</h2>
+          <span id="orderCountBadge" class="bg-slate-800 text-slate-300 text-xs px-2.5 py-0.5 rounded-full font-bold">0 cadastrados</span>
+        </div>
+
+        <button onclick="openNewOrderModal()" class="bg-gradient-to-r from-gringo-orange to-gringo-orange-dark hover:from-gringo-orange-light hover:to-gringo-orange text-white font-bold px-4 py-2.5 rounded-lg text-sm shadow-md flex items-center justify-center gap-2 transition">
+          <i class="fa-solid fa-plus"></i> Cadastrar Novo Envio
+        </button>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-grow">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-500 text-sm"></i>
+          <input 
+            type="text" 
+            id="orderSearchInput" 
+            onkeyup="filterOrdersTable()" 
+            placeholder="Buscar por nome do cliente ou código de rastreio..." 
+            class="w-full pl-9 pr-4 py-2.5 bg-slate-900 border border-gringo-border rounded-lg text-xs sm:text-sm text-white focus:outline-none focus:border-gringo-blue"
+          >
+        </div>
+
+        <select id="statusFilter" onchange="filterOrdersTable()" class="bg-slate-900 border border-gringo-border rounded-lg px-3 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-gringo-blue">
+          <option value="todos">Todos os Status</option>
+          <option value="Pedido recebido">Pedido recebido</option>
+          <option value="Pedido em separação">Pedido em separação</option>
+          <option value="Pedido enviado">Pedido enviado</option>
+          <option value="Em trânsito">Em trânsito</option>
+          <option value="Entregue">Entregue</option>
+        </select>
+      </div>
+
+      <!-- Orders Table -->
+      <div class="bg-gringo-card border border-gringo-border rounded-2xl overflow-hidden shadow-xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr class="bg-slate-900/90 border-b border-gringo-border text-slate-400 font-bold uppercase text-[11px] tracking-wider">
+                <th class="py-3.5 px-4">Código Rastreio</th>
+                <th class="py-3.5 px-4">Cliente & Contato</th>
+                <th class="py-3.5 px-4">Destino / CEP</th>
+                <th class="py-3.5 px-4">Itens / Peças</th>
+                <th class="py-3.5 px-4">Status Atual</th>
+                <th class="py-3.5 px-4">Data Registro</th>
+                <th class="py-3.5 px-4 text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody" class="divide-y divide-slate-800">
+              <!-- Linhas geradas dinamicamente -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyOrdersNotice" class="hidden text-center py-12 text-slate-400">
+          <i class="fa-solid fa-box-open text-4xl mb-3 text-slate-600"></i>
+          <p class="font-semibold">Nenhum envio cadastrado ainda.</p>
+          <p class="text-xs text-slate-500 mt-1">Clique em "Cadastrar Novo Envio" para gerar o primeiro rastreio.</p>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Modal: Cadastrar Novo Envio -->
+  <div id="newOrderModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-gringo-card border-2 border-gringo-orange rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeNewOrderModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 border-b border-gringo-border pb-4 mb-5">
+        <div class="w-10 h-10 rounded-lg bg-gringo-orange/20 text-gringo-orange flex items-center justify-center text-xl shrink-0">
+          <i class="fa-solid fa-truck-ramp-box"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Cadastrar Novo Envio</h3>
+          <p class="text-xs text-slate-400">Gere um código de rastreamento oficial para a encomenda do cliente.</p>
+        </div>
+      </div>
+
+      <form id="newOrderForm" onsubmit="submitNewOrder(event)" class="space-y-4">
+        
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Nome Completo do Cliente *</label>
+          <input type="text" id="orderCustName" required placeholder="Ex: Lucas Ferreira" class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-orange">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Telefone / WhatsApp</label>
+            <input type="text" id="orderCustPhone" placeholder="Ex: (51) 98765-4321" class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-orange">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">CEP de Entrega *</label>
+            <div class="flex gap-2">
+              <input type="text" id="orderCustCep" onblur="lookupViaCep(this.value)" required placeholder="Ex: 94000-000" class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-orange">
+              <button type="button" onclick="lookupViaCep(document.getElementById('orderCustCep').value)" class="px-3 bg-slate-800 border border-gringo-border rounded-lg text-slate-300 text-xs hover:text-white" title="Buscar CEP">
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Endereço (Rua / Logradouro) *</label>
+          <input type="text" id="orderCustAddress" required placeholder="Ex: Av. Dorival Cândido Luz de Oliveira" class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-orange">
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Número</label>
+            <input type="text" id="orderCustNumber" placeholder="Ex: 1250" class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-orange">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Complemento</label>
+            <input type="text" id="orderCustComplement" placeholder="Ex: Apto 201" class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-orange">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Bairro</label>
+            <input type="text" id="orderCustNeighborhood" placeholder="Ex: Centro" class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-orange">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Estado (UF)</label>
+            <input type="text" id="orderCustState" placeholder="RS" maxlength="2" class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white uppercase focus:outline-none focus:border-gringo-orange">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Cidade</label>
+          <input type="text" id="orderCustCity" placeholder="Ex: Gravataí" class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-orange">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Descrição das Peças / Mercadoria</label>
+          <input type="text" id="orderItems" placeholder="Ex: Par de Amortecedores Dianteiros Turbogás" class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-orange">
+        </div>
+
+        <div class="bg-slate-900/90 border border-gringo-border rounded-xl p-3.5">
+          <label class="block text-xs font-bold text-gringo-orange uppercase tracking-wider mb-1">Código de Rastreamento</label>
+          <div class="flex gap-2">
+            <input type="text" id="customTrackingCode" placeholder="Clique para gerar automaticamente ou digite" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-sm text-white font-mono uppercase focus:outline-none focus:border-gringo-orange">
+            <button type="button" onclick="generateRandomTrackingCode()" class="px-3 py-2 bg-gringo-blue hover:bg-gringo-blue-dark text-white rounded-lg text-xs font-bold whitespace-nowrap transition">
+              <i class="fa-solid fa-arrows-rotate"></i> Gerar Rastreio
+            </button>
+          </div>
+          <span class="text-[11px] text-slate-500 mt-1 block">Deixe em branco ou clique em 'Gerar Rastreio' para formato único (ex: GR123456789BR).</span>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-gringo-border">
+          <button type="button" onclick="closeNewOrderModal()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition">
+            Cancelar
+          </button>
+          <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-gringo-orange to-gringo-orange-dark hover:from-gringo-orange-light hover:to-gringo-orange text-white font-bold rounded-lg text-sm shadow-lg transition flex items-center gap-2">
+            <i class="fa-solid fa-check"></i> Salvar e Gerar Rastreio
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Atualizar Status do Envio -->
+  <div id="updateStatusModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-gringo-card border-2 border-gringo-blue rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+      <button onclick="closeUpdateStatusModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 border-b border-gringo-border pb-4 mb-4">
+        <div class="w-10 h-10 rounded-lg bg-gringo-blue/20 text-gringo-blue-light flex items-center justify-center text-xl shrink-0">
+          <i class="fa-solid fa-route"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">Atualizar Status de Envio</h3>
+          <span id="updateModalCode" class="text-xs font-mono text-gringo-orange font-bold">GR000000000BR</span>
+        </div>
+      </div>
+
+      <form onsubmit="submitStatusUpdate(event)" class="space-y-4">
+        <input type="hidden" id="updateOrderId">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Novo Status do Pedido *</label>
+          <select id="updateStatusSelect" required class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-blue">
+            <option value="Pedido recebido">Pedido recebido (Confirmado)</option>
+            <option value="Pedido em separação">Pedido em separação</option>
+            <option value="Pedido enviado">Pedido enviado</option>
+            <option value="Em trânsito">Em trânsito para a unidade de distribuição</option>
+            <option value="Saiu para entrega">Saiu para entrega ao destinatário</option>
+            <option value="Entregue">Entregue ao destinatário</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Descrição / Mensagem do Checkpoint</label>
+          <input type="text" id="updateStatusDesc" placeholder="Ex: Mercadoria despachada da filial Gravataí/RS." class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-blue">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Localidade do Evento</label>
+          <input type="text" id="updateStatusLocation" value="Gravataí/RS" class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-blue">
+        </div>
+
+        <p class="text-[11px] text-slate-400 flex items-center gap-1.5 pt-1">
+          <i class="fa-regular fa-clock text-gringo-blue-light"></i> Registrado automaticamente no <strong>Horário Oficial de Brasília (UTC-3)</strong>.
+        </p>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-gringo-border">
+          <button type="button" onclick="closeUpdateStatusModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 bg-gringo-blue hover:bg-gringo-blue-dark text-white font-bold rounded-lg text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk"></i> Atualizar Status
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Configurações da Loja & WhatsApp -->
+  <div id="settingsModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-gringo-card border-2 border-gringo-border rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+      <button onclick="closeSettingsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 border-b border-gringo-border pb-4 mb-4">
+        <div class="w-10 h-10 rounded-lg bg-slate-800 text-gringo-orange flex items-center justify-center text-xl shrink-0">
+          <i class="fa-solid fa-sliders"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">Configurações da Loja</h3>
+          <p class="text-xs text-slate-400">Atualize o WhatsApp da equipe e dados de contato.</p>
+        </div>
+      </div>
+
+      <form onsubmit="submitSettingsUpdate(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-emerald-400 mb-1">
+            <i class="fa-brands fa-whatsapp text-sm mr-1"></i> WhatsApp Business da Empresa:
+          </label>
+          <input type="text" id="settingWhatsapp" placeholder="Ex: 51993687877 (com DDD)" required class="w-full bg-slate-900 border border-emerald-600/60 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+          <span class="text-[10px] text-slate-400 mt-1 block">Assim que a equipe passar o novo número, basta alterá-lo aqui para atualizar os botões de todo o site.</span>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Telefone Fixo</label>
+          <input type="text" id="settingPhone" placeholder="Ex: 5130475595" class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-blue">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Endereço da Loja / Oficina</label>
+          <input type="text" id="settingAddress" class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-blue">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Alterar Senha do Admin (opcional)</label>
+          <input type="password" id="settingNewPassword" placeholder="Deixe em branco para manter a senha atual" class="w-full bg-slate-900 border border-gringo-border rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-gringo-blue">
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-gringo-border">
+          <button type="button" onclick="closeSettingsModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs sm:text-sm shadow-md transition flex items-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk"></i> Salvar Configurações
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    let adminToken = sessionStorage.getItem('gringoAdminToken') || '';
+    let cachedOrders = [];
+
+    // Formatar data em PT-BR (Horário Oficial de Brasília)
+    function formatDateBr(str) {
+      if (!str) return '--';
+      try {
+        const match = str.match(/(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+        if (match) {
+          const [_, y, m, d, h, min] = match;
+          return `${d}/${m}/${y} às ${h}:${min}`;
+        }
+        return str;
+      } catch (e) {
+        return str;
+      }
+    }
+
+    // Toggle de visibilidade da senha
+    function togglePasswordVisibility() {
+      const inp = document.getElementById('adminPasswordInput');
+      const icon = document.getElementById('eyeIcon');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
+      } else {
+        inp.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+      }
+    }
+
+    // Login
+    async function handleLogin(e) {
+      e.preventDefault();
+      const pwd = document.getElementById('adminPasswordInput').value.trim();
+      const errBox = document.getElementById('loginError');
+      errBox.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pwd })
+        });
+        const json = await res.json();
+
+        if (json.success) {
+          adminToken = json.token;
+          sessionStorage.setItem('gringoAdminToken', adminToken);
+          showAdminDashboard();
+        } else {
+          errBox.innerText = json.error || 'Senha incorreta. Acesso negado.';
+          errBox.classList.remove('hidden');
+        }
+      } catch (err) {
+        errBox.innerText = 'Erro ao autenticar. Tente novamente.';
+        errBox.classList.remove('hidden');
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('gringoAdminToken');
+      adminToken = '';
+      document.getElementById('adminLayout').classList.add('hidden');
+      document.getElementById('adminLayout').classList.remove('flex');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('adminPasswordInput').value = '';
+    }
+
+    function showAdminDashboard() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('adminLayout').classList.remove('hidden');
+      document.getElementById('adminLayout').classList.add('flex');
+      loadOrders();
+      loadSettings();
+    }
+
+    // Verifica token salvo
+    if (adminToken) {
+      showAdminDashboard();
+    }
+
+    // Gerador de código no frontend para pré-visualização
+    function generateRandomTrackingCode() {
+      const num = Math.floor(100000000 + Math.random() * 900000000);
+      document.getElementById('customTrackingCode').value = `GR${num}BR`;
+    }
+
+    // Busca automática ViaCEP
+    async function lookupViaCep(cepRaw) {
+      const cep = (cepRaw || '').replace(/\D/g, '');
+      if (cep.length !== 8) return;
+
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await res.json();
+        if (!data.erro) {
+          if (data.logradouro) document.getElementById('orderCustAddress').value = data.logradouro;
+          if (data.bairro) document.getElementById('orderCustNeighborhood').value = data.bairro;
+          if (data.localidade) document.getElementById('orderCustCity').value = data.localidade;
+          if (data.uf) document.getElementById('orderCustState').value = data.uf;
+        }
+      } catch (e) {
+        console.warn('ViaCEP indisponível:', e);
+      }
+    }
+
+    // Carregar Pedidos
+    async function loadOrders() {
+      try {
+        const res = await fetch('/api/admin/orders', {
+          headers: { 'x-admin-password': adminToken }
+        });
+
+        if (res.status === 401) {
+          handleLogout();
+          return;
+        }
+
+        const json = await res.json();
+        if (json.success) {
+          cachedOrders = json.orders || [];
+          renderOrdersTable(cachedOrders);
+          updateStats(cachedOrders);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar envios:', err);
+      }
+    }
+
+    function updateStats(orders) {
+      document.getElementById('statTotal').innerText = orders.length;
+      document.getElementById('orderCountBadge').innerText = `${orders.length} cadastrados`;
+
+      const received = orders.filter(o => o.status.toLowerCase().includes('recebido') || o.status.toLowerCase().includes('criado')).length;
+      const separation = orders.filter(o => o.status.toLowerCase().includes('separação')).length;
+      const transit = orders.filter(o => o.status.toLowerCase().includes('trânsito') || o.status.toLowerCase().includes('enviado') || o.status.toLowerCase().includes('despachado') || o.status.toLowerCase().includes('saiu')).length;
+
+      document.getElementById('statReceived').innerText = received;
+      document.getElementById('statSeparation').innerText = separation;
+      document.getElementById('statTransit').innerText = transit;
+    }
+
+    function renderOrdersTable(orders) {
+      const tbody = document.getElementById('ordersTableBody');
+      const emptyNotice = document.getElementById('emptyOrdersNotice');
+      tbody.innerHTML = '';
+
+      if (orders.length === 0) {
+        emptyNotice.classList.remove('hidden');
+        return;
+      }
+      emptyNotice.classList.add('hidden');
+
+      orders.forEach(order => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-900/60 transition';
+
+        let badgeColor = 'bg-gringo-blue/20 text-gringo-blue-light border-gringo-blue/30';
+        const s = (order.status || '').toLowerCase();
+        if (s.includes('separação')) {
+          badgeColor = 'bg-gringo-orange/20 text-gringo-orange-light border-gringo-orange/30';
+        } else if (s.includes('enviado') || s.includes('trânsito') || s.includes('despachado')) {
+          badgeColor = 'bg-purple-900/40 text-purple-300 border-purple-700/50';
+        } else if (s.includes('entregue')) {
+          badgeColor = 'bg-emerald-950/60 text-emerald-400 border-emerald-700';
+        }
+
+        tr.innerHTML = `
+          <td class="py-3.5 px-4 font-mono font-bold text-white whitespace-nowrap">
+            <div class="flex items-center gap-1.5">
+              <span>${order.tracking_code}</span>
+              <button onclick="copyTrackingLink('${order.tracking_code}')" class="text-slate-400 hover:text-gringo-orange p-1" title="Copiar Link de Rastreio">
+                <i class="fa-regular fa-copy"></i>
+              </button>
+            </div>
+          </td>
+          <td class="py-3.5 px-4">
+            <strong class="text-white block">${order.customer_name}</strong>
+            <span class="text-xs text-slate-400">${order.customer_phone || 'Sem telefone'}</span>
+          </td>
+          <td class="py-3.5 px-4 text-slate-300">
+            <div>${order.city} / ${order.state}</div>
+            <span class="text-[11px] text-slate-500">CEP: ${order.cep}</span>
+          </td>
+          <td class="py-3.5 px-4 text-slate-300 max-w-xs truncate" title="${order.items_description || ''}">
+            ${order.items_description || 'Peças'}
+          </td>
+          <td class="py-3.5 px-4 whitespace-nowrap">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${badgeColor}">
+              ${order.status}
+            </span>
+          </td>
+          <td class="py-3.5 px-4 text-slate-400 whitespace-nowrap text-xs">
+            <div>${formatDateBr(order.created_at)}</div>
+            <span class="text-[10px] text-slate-500 font-mono">Brasília (UTC-3)</span>
+          </td>
+          <td class="py-3.5 px-4 text-center whitespace-nowrap">
+            <div class="inline-flex items-center gap-1.5">
+              <button onclick="openUpdateStatusModal(${order.id}, '${order.tracking_code}', '${order.status}')" class="px-2.5 py-1.5 bg-gringo-blue/20 hover:bg-gringo-blue border border-gringo-blue/40 text-gringo-blue-light hover:text-white rounded text-xs font-semibold transition" title="Atualizar Status">
+                <i class="fa-solid fa-arrows-rotate"></i> Status
+              </button>
+              <a href="/rastreio?codigo=${order.tracking_code}" target="_blank" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition" title="Ver Consulta Pública">
+                <i class="fa-solid fa-eye"></i>
+              </a>
+              <button onclick="deleteOrder(${order.id})" class="px-2.5 py-1.5 bg-red-950/40 hover:bg-red-800 text-red-400 hover:text-white rounded text-xs transition" title="Excluir">
+                <i class="fa-regular fa-trash-can"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterOrdersTable() {
+      const q = document.getElementById('orderSearchInput').value.toLowerCase().trim();
+      const statusF = document.getElementById('statusFilter').value;
+
+      const filtered = cachedOrders.filter(o => {
+        const matchesQuery = o.customer_name.toLowerCase().includes(q) || o.tracking_code.toLowerCase().includes(q);
+        const matchesStatus = statusF === 'todos' || o.status === statusF;
+        return matchesQuery && matchesStatus;
+      });
+
+      renderOrdersTable(filtered);
+    }
+
+    function copyTrackingLink(code) {
+      const url = `${window.location.origin}/rastreio?codigo=${code}`;
+      navigator.clipboard.writeText(url).then(() => {
+        alert(`Link de rastreio copiado!\n${url}`);
+      });
+    }
+
+    // Modal Novo Envio
+    function openNewOrderModal() {
+      generateRandomTrackingCode();
+      document.getElementById('newOrderModal').classList.remove('hidden');
+      document.getElementById('newOrderModal').classList.add('flex');
+    }
+
+    function closeNewOrderModal() {
+      document.getElementById('newOrderModal').classList.remove('flex');
+      document.getElementById('newOrderModal').classList.add('hidden');
+      document.getElementById('newOrderForm').reset();
+    }
+
+    async function submitNewOrder(e) {
+      e.preventDefault();
+
+      const payload = {
+        customer_name: document.getElementById('orderCustName').value.trim(),
+        customer_phone: document.getElementById('orderCustPhone').value.trim(),
+        cep: document.getElementById('orderCustCep').value.trim(),
+        address: document.getElementById('orderCustAddress').value.trim(),
+        number: document.getElementById('orderCustNumber').value.trim(),
+        complement: document.getElementById('orderCustComplement').value.trim(),
+        neighborhood: document.getElementById('orderCustNeighborhood').value.trim(),
+        state: document.getElementById('orderCustState').value.trim().toUpperCase() || 'RS',
+        city: document.getElementById('orderCustCity').value.trim() || 'Gravataí',
+        items_description: document.getElementById('orderItems').value.trim() || 'Peças Automotivas',
+        tracking_code: document.getElementById('customTrackingCode').value.trim().toUpperCase()
+      };
+
+      try {
+        const res = await fetch('/api/admin/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-password': adminToken
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const json = await res.json();
+        if (json.success) {
+          alert(`Envio cadastrado com sucesso!\nCódigo: ${json.order.tracking_code}`);
+          closeNewOrderModal();
+          loadOrders();
+        } else {
+          alert('Erro ao salvar: ' + (json.error || 'Erro desconhecido'));
+        }
+      } catch (err) {
+        alert('Erro ao conectar ao servidor para cadastrar envio.');
+      }
+    }
+
+    // Modal Atualizar Status
+    function openUpdateStatusModal(id, code, currentStatus) {
+      document.getElementById('updateOrderId').value = id;
+      document.getElementById('updateModalCode').innerText = code;
+      document.getElementById('updateStatusSelect').value = currentStatus || 'Pedido em separação';
+      document.getElementById('updateStatusDesc').value = '';
+      document.getElementById('updateStatusLocation').value = 'Gravataí/RS';
+
+      document.getElementById('updateStatusModal').classList.remove('hidden');
+      document.getElementById('updateStatusModal').classList.add('flex');
+    }
+
+    function closeUpdateStatusModal() {
+      document.getElementById('updateStatusModal').classList.remove('flex');
+      document.getElementById('updateStatusModal').classList.add('hidden');
+    }
+
+    async function submitStatusUpdate(e) {
+      e.preventDefault();
+      const orderId = document.getElementById('updateOrderId').value;
+      const status = document.getElementById('updateStatusSelect').value;
+      const description = document.getElementById('updateStatusDesc').value.trim() || `Status atualizado para: ${status}`;
+      const location = document.getElementById('updateStatusLocation').value.trim() || 'Gravataí/RS';
+
+      try {
+        const res = await fetch(`/api/admin/orders/${orderId}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-password': adminToken
+          },
+          body: JSON.stringify({ status, description, location })
+        });
+
+        const json = await res.json();
+        if (json.success) {
+          closeUpdateStatusModal();
+          loadOrders();
+        } else {
+          alert('Erro ao atualizar: ' + json.error);
+        }
+      } catch (err) {
+        alert('Erro ao conectar ao servidor.');
+      }
+    }
+
+    // Excluir Pedido
+    async function deleteOrder(id) {
+      if (!confirm('Deseja realmente excluir este envio e seu histórico de rastreio?')) return;
+
+      try {
+        const res = await fetch(`/api/admin/orders/${id}`, {
+          method: 'DELETE',
+          headers: { 'x-admin-password': adminToken }
+        });
+
+        const json = await res.json();
+        if (json.success) {
+          loadOrders();
+        } else {
+          alert('Erro ao excluir: ' + json.error);
+        }
+      } catch (err) {
+        alert('Erro de conexão ao excluir.');
+      }
+    }
+
+    // Configurações
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/admin/settings', {
+          headers: { 'x-admin-password': adminToken }
+        });
+        const json = await res.json();
+        if (json.success && json.settings) {
+          document.getElementById('settingWhatsapp').value = json.settings.whatsapp_number || '51993687877';
+          document.getElementById('settingPhone').value = json.settings.phone_landline || '5130475595';
+          document.getElementById('settingAddress').value = json.settings.address || '';
+        }
+      } catch (e) {
+        console.warn('Erro ao carregar settings:', e);
+      }
+    }
+
+    function openSettingsModal() {
+      loadSettings();
+      document.getElementById('settingsModal').classList.remove('hidden');
+      document.getElementById('settingsModal').classList.add('flex');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.remove('flex');
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    async function submitSettingsUpdate(e) {
+      e.preventDefault();
+      const payload = {
+        whatsapp_number: document.getElementById('settingWhatsapp').value.trim(),
+        phone_landline: document.getElementById('settingPhone').value.trim(),
+        address: document.getElementById('settingAddress').value.trim()
+      };
+
+      const newPwd = document.getElementById('settingNewPassword').value.trim();
+      if (newPwd) {
+        payload.admin_password = newPwd;
+      }
+
+      try {
+        const res = await fetch('/api/admin/settings', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-password': adminToken
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const json = await res.json();
+        if (json.success) {
+          alert('Configurações atualizadas com sucesso!');
+          if (newPwd) {
+            adminToken = newPwd;
+            sessionStorage.setItem('gringoAdminToken', adminToken);
+          }
+          closeSettingsModal();
+        } else {
+          alert('Erro ao salvar configurações.');
+        }
+      } catch (err) {
+        alert('Erro de conexão ao salvar configurações.');
+      }
+    }
+  </script>
+</body>
+</html>

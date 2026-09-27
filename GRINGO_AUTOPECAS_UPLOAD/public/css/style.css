@@ -1,0 +1,103 @@
+/* Custom High-End Styling for Gringo Autopeças */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --color-primary: #ff5500;
+  --color-primary-dark: #d44500;
+  --color-blue-glow: #0072ce;
+  --bg-dark: #07090e;
+  --bg-card: #0e121b;
+  --bg-card-hover: #141b27;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-dark);
+  color: #f1f5f9;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: -0.03em;
+}
+
+/* Subtle racing grid overlay */
+.bg-racing-grid {
+  background-color: #07090e;
+  background-image: linear-gradient(rgba(255, 85, 0, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 114, 206, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Neon glow classes */
+.glow-orange {
+  box-shadow: 0 0 35px rgba(255, 85, 0, 0.25);
+}
+
+.glow-blue {
+  box-shadow: 0 0 35px rgba(0, 114, 206, 0.25);
+}
+
+.text-gradient-gringo {
+  background: linear-gradient(135deg, #0084ff 0%, #ff6a00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090c14;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f293d;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ff5500;
+}
+
+/* Scanline effect */
+@keyframes scanline {
+  0% { top: 10%; opacity: 0; }
+  10% { opacity: 0.35; }
+  90% { opacity: 0.35; }
+  100% { top: 90%; opacity: 0; }
+}
+
+.animate-scanline {
+  animation: scanline 8s ease-in-out infinite;
+}
+
+/* Fluid card hover */
+.product-card-modern {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.25s ease, 
+              box-shadow 0.25s ease;
+}
+
+.product-card-modern:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 85, 0, 0.4);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 85, 0, 0.12);
+}
+
+/* Modal and Drawer transitions */
+.modal-backdrop {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.drawer-slide-in {
+  animation: drawerSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes drawerSlide {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
