@@ -42,7 +42,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="bg-racing-grid text-slate-100 min-h-screen flex flex-col antialiased">
+<body class="bg-racing-grid text-slate-100 min-h-screen flex flex-col antialiased w-full max-w-full overflow-x-hidden">
 
   <!-- Sticky Main Navbar -->
   <header class="sticky top-0 z-40 bg-[#07090E]/95 backdrop-blur-md border-b border-white/[0.08] shadow-2xl">
@@ -232,14 +232,14 @@
     <div class="space-y-2.5 sm:space-y-4 mb-4 sm:mb-8">
       
       <!-- Category Tabs (Horizontal Scrollable with Native Touch Fluidity) -->
-      <div class="relative">
-        <div id="categoryTabs" class="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1.5 sm:pb-2 scrollbar-none text-xs font-semibold scroll-smooth touch-pan-x select-none" style="-webkit-overflow-scrolling: touch;">
+      <div class="relative w-full max-w-full min-w-0 overflow-hidden">
+        <div id="categoryTabs" class="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1.5 sm:pb-2 scrollbar-none text-xs font-semibold touch-pan-x select-none w-full" style="-webkit-overflow-scrolling: touch;">
           <!-- Injected via JavaScript starting directly with Bancos & Recaro -->
         </div>
       </div>
 
       <!-- Filters & Sorting Bar (Single neat row on mobile) -->
-      <div class="flex items-center justify-between gap-1.5 sm:gap-3 bg-gringo-surface border border-white/[0.08] p-2 sm:p-3 rounded-xl">
+      <div class="flex items-center justify-between gap-1.5 sm:gap-3 bg-gringo-surface border border-white/[0.08] p-2 sm:p-3 rounded-xl w-full max-w-full">
         
         <div class="flex items-center gap-1 text-[11px] sm:text-xs">
           <button onclick="filterByCondition('all')" class="cond-btn active px-2 sm:px-3 py-1 sm:py-1.5 rounded-md bg-white/[0.1] text-white transition">Todas</button>
@@ -262,7 +262,7 @@
     </div>
 
     <!-- Product Grid (Fluid Mobile 2-Cols & Desktop 4-Cols) -->
-    <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+    <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 w-full max-w-full">
       <!-- Injected via JavaScript from products.json -->
       <div class="col-span-full py-16 text-center text-slate-500">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-gringo-primary border-t-transparent mb-3"></div>
@@ -270,11 +270,15 @@
       </div>
     </div>
 
-    <!-- Pagination / Load More -->
-    <div id="loadMoreContainer" class="mt-12 text-center hidden">
-      <button onclick="loadMoreProducts()" class="px-8 py-3.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.1] hover:border-gringo-primary/50 text-white font-heading font-bold uppercase tracking-wider text-xs rounded-lg transition-all">
-        Carregar Mais Peças
-      </button>
+    <!-- Automatic Infinite Scroll Sentinel -->
+    <div id="infiniteScrollSentinel" class="py-8 text-center w-full">
+      <div id="infiniteScrollLoading" class="hidden inline-flex items-center gap-2 text-xs text-slate-400">
+        <div class="w-4 h-4 border-2 border-gringo-primary border-t-transparent rounded-full animate-spin"></div>
+        <span>Carregando mais peças...</span>
+      </div>
+      <p id="infiniteScrollEnd" class="hidden text-xs text-slate-500 font-mono">
+        ✓ Todas as peças desta categoria foram exibidas
+      </p>
     </div>
 
   </section>
@@ -733,8 +737,17 @@
             <p class="font-bold text-white text-base">Nenhuma peça encontrada com estes filtros.</p>
             <p class="text-xs text-slate-500 mt-1">Tente selecionar outra categoria ou limpar a busca.</p>
           </div>
+        grid.innerHTML = `
+          <div class="col-span-full py-16 text-center text-slate-400">
+            <i class="fa-solid fa-box-open text-4xl text-slate-600 mb-3"></i>
+            <p class="font-bold text-white text-base">Nenhuma peça encontrada com estes filtros.</p>
+            <p class="text-xs text-slate-500 mt-1">Tente selecionar outra categoria ou limpar a busca.</p>
+          </div>
         `;
-        document.getElementById('loadMoreContainer').classList.add('hidden');
+        const scrollLoading = document.getElementById('infiniteScrollLoading');
+        const scrollEnd = document.getElementById('infiniteScrollEnd');
+        if (scrollLoading) scrollLoading.classList.add('hidden');
+        if (scrollEnd) scrollEnd.classList.add('hidden');
         return;
       }
 
@@ -751,8 +764,8 @@
 
         card.innerHTML = `
           <div>
-            <div class="relative aspect-[4/3] bg-black overflow-hidden cursor-pointer" onclick="openProductDetail('${p.id}')">
-              <img src="${mainImg}" alt="${p.name}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" loading="lazy" onerror="this.src='https://driveparts.com.br/assets/marketplace/img/categories/motor.webp'">
+            <div class="relative h-28 sm:h-36 bg-black/50 overflow-hidden cursor-pointer flex items-center justify-center p-2 rounded-t-xl" onclick="openProductDetail('${p.id}')">
+              <img src="${mainImg}" alt="${p.name}" class="max-h-full max-w-full object-contain transform group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.src='https://driveparts.com.br/assets/marketplace/img/categories/motor.webp'">
               
               <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex items-center gap-1">
                 <span class="bg-gringo-primary text-white text-[9px] sm:text-[10px] font-black uppercase px-1.5 sm:px-2 py-0.5 rounded shadow">
@@ -800,17 +813,39 @@
         grid.appendChild(card);
       });
 
-      const loadMoreBtn = document.getElementById('loadMoreContainer');
+      const scrollLoading = document.getElementById('infiniteScrollLoading');
+      const scrollEnd = document.getElementById('infiniteScrollEnd');
+
       if (filtered.length > visibleLimit) {
-        loadMoreBtn.classList.remove('hidden');
+        if (scrollLoading) scrollLoading.classList.remove('hidden');
+        if (scrollEnd) scrollEnd.classList.add('hidden');
       } else {
-        loadMoreBtn.classList.add('hidden');
+        if (scrollLoading) scrollLoading.classList.add('hidden');
+        if (scrollEnd && filtered.length > 0) scrollEnd.classList.remove('hidden');
       }
+
+      setupInfiniteScroll();
     }
 
-    function loadMoreProducts() {
-      visibleLimit += 24;
-      renderProducts();
+    // Observer de Rolagem Infinita Automática
+    let infiniteObserver;
+    function setupInfiniteScroll() {
+      const sentinel = document.getElementById('infiniteScrollSentinel');
+      if (!sentinel) return;
+
+      if (infiniteObserver) infiniteObserver.disconnect();
+
+      infiniteObserver = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          const filtered = getFilteredProducts();
+          if (visibleLimit < filtered.length) {
+            visibleLimit += 20;
+            renderProducts();
+          }
+        }
+      }, { rootMargin: '300px' });
+
+      infiniteObserver.observe(sentinel);
     }
 
     // Modal Details
