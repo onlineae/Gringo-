@@ -239,7 +239,7 @@
       </div>
 
       <!-- Filters & Sorting Bar (Single neat row on mobile) -->
-      <div class="flex items-center justify-between gap-1.5 sm:gap-3 bg-gringo-surface border border-white/[0.08] p-2 sm:p-3 rounded-xl w-full max-w-full">
+      <div class="flex items-center justify-between gap-1 sm:gap-3 bg-gringo-surface border border-white/[0.08] p-1.5 sm:p-3 rounded-xl w-full max-w-full overflow-hidden">
         
         <div class="flex items-center gap-1 text-[11px] sm:text-xs">
           <button onclick="filterByCondition('all')" class="cond-btn active px-2 sm:px-3 py-1 sm:py-1.5 rounded-md bg-white/[0.1] text-white transition">Todas</button>
@@ -247,14 +247,24 @@
           <button onclick="filterByCondition('nova')" class="cond-btn px-2 sm:px-3 py-1 sm:py-1.5 rounded-md bg-white/[0.03] hover:bg-white/[0.08] text-slate-400 hover:text-white transition">Novas</button>
         </div>
 
-        <div class="flex items-center gap-2">
-          <span id="filteredCountLabel" class="hidden sm:inline text-xs text-slate-400 font-mono">205 produtos</span>
-          <select id="sortSelect" onchange="handleSortChange(this.value)" class="bg-black/50 border border-white/[0.1] text-slate-200 text-[11px] sm:text-xs rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 outline-none focus:border-gringo-primary">
-            <option value="relevance">Mais Relevantes</option>
+        <div class="flex items-center gap-1 sm:gap-2">
+          <span id="filteredCountLabel" class="hidden md:inline text-xs text-slate-400 font-mono">205 produtos</span>
+          <select id="sortSelect" onchange="handleSortChange(this.value)" class="bg-black/50 border border-white/[0.1] text-slate-200 text-[10px] sm:text-xs rounded-lg px-1.5 sm:px-3 py-1 sm:py-1.5 outline-none focus:border-gringo-primary">
+            <option value="relevance">Relevância</option>
             <option value="price_asc">Menor Preço</option>
             <option value="price_desc">Maior Preço</option>
             <option value="rating">Melhor Avaliados</option>
           </select>
+
+          <!-- View Mode Toggle (Grade 2 Colunas / Lista Horizontal) -->
+          <div class="flex items-center gap-1 border-l border-white/[0.1] pl-1.5 sm:pl-2">
+            <button id="viewGridBtn" onclick="setViewMode('grid')" class="p-1 sm:p-1.5 rounded-md text-white bg-white/[0.1] border border-white/[0.1] hover:bg-white/[0.2] transition" title="Modo Grade (2 por linha)">
+              <i class="fa-solid fa-table-cells-large text-xs"></i>
+            </button>
+            <button id="viewListBtn" onclick="setViewMode('list')" class="p-1 sm:p-1.5 rounded-md text-slate-400 bg-white/[0.03] border border-transparent hover:text-white hover:bg-white/[0.08] transition" title="Modo Lista (1 por linha detalhada)">
+              <i class="fa-solid fa-list-ul text-xs"></i>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -4649,6 +4659,7 @@
     let currentStoreWhatsapp = '51993687877';
     let activePreCheckoutProduct = null;
     let visibleLimit = 24;
+    let currentViewMode = localStorage.getItem('gringo_view_mode') || 'grid';
 
     // Currency formatting
     function formatBrl(val) {
@@ -4687,7 +4698,7 @@
         if (counter) counter.innerText = `${allProducts.length} peças catalogadas`;
 
         renderCategoryTabs();
-        renderProducts();
+        setViewMode(currentViewMode);
         updateCartBadge();
 
         // Tenta atualizar se houver conexão com backend sem travar a tela
@@ -4802,11 +4813,46 @@
       return filtered;
     }
 
+    // Set View Mode (Grade ou Lista)
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      localStorage.setItem('gringo_view_mode', mode);
+      const grid = document.getElementById('productGrid');
+      const gridBtn = document.getElementById('viewGridBtn');
+      const listBtn = document.getElementById('viewListBtn');
+
+      if (grid) {
+        if (mode === 'list') {
+          grid.classList.add('view-list');
+        } else {
+          grid.classList.remove('view-list');
+        }
+      }
+
+      if (gridBtn && listBtn) {
+        if (mode === 'list') {
+          listBtn.className = 'p-1 sm:p-1.5 rounded-md text-white bg-white/[0.1] border border-white/[0.1] transition';
+          gridBtn.className = 'p-1 sm:p-1.5 rounded-md text-slate-400 bg-white/[0.03] border border-transparent hover:text-white hover:bg-white/[0.08] transition';
+        } else {
+          gridBtn.className = 'p-1 sm:p-1.5 rounded-md text-white bg-white/[0.1] border border-white/[0.1] transition';
+          listBtn.className = 'p-1 sm:p-1.5 rounded-md text-slate-400 bg-white/[0.03] border border-transparent hover:text-white hover:bg-white/[0.08] transition';
+        }
+      }
+
+      renderProducts();
+    }
+
     // Render Product Cards
     function renderProducts() {
       const grid = document.getElementById('productGrid');
       const filtered = getFilteredProducts();
       document.getElementById('filteredCountLabel').innerText = `${filtered.length} produtos`;
+
+      if (currentViewMode === 'list') {
+        grid.classList.add('view-list');
+      } else {
+        grid.classList.remove('view-list');
+      }
 
       if (filtered.length === 0) {
         grid.innerHTML = `
@@ -4828,59 +4874,108 @@
 
       displayed.forEach(p => {
         const card = document.createElement('div');
-        card.className = 'product-card-modern bg-[#0E121B] border border-white/[0.08] rounded-xl overflow-hidden flex flex-col justify-between group shadow-lg';
-
         const mainImg = p.image_url || 'https://driveparts.com.br/assets/marketplace/img/categories/motor.webp';
         const pricePix = p.price_pix || Math.round(p.price * 0.9);
         const discountPct = p.price && pricePix ? Math.round(((p.price - pricePix) / p.price) * 100) : 10;
 
-        card.innerHTML = `
-          <div>
-            <div class="relative h-28 sm:h-36 bg-black/50 overflow-hidden cursor-pointer flex items-center justify-center p-2 rounded-t-xl" onclick="openProductDetail('${p.id}')">
-              <img src="${mainImg}" alt="${p.name}" class="max-h-full max-w-full object-contain transform group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.src='https://driveparts.com.br/assets/marketplace/img/categories/motor.webp'">
-              
-              <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex items-center gap-1">
-                <span class="bg-gringo-primary text-white text-[9px] sm:text-[10px] font-black uppercase px-1.5 sm:px-2 py-0.5 rounded shadow">
-                  -${discountPct}% PIX
+        if (currentViewMode === 'list') {
+          card.className = 'product-card-modern bg-[#0E121B] border border-white/[0.08] rounded-xl overflow-hidden group shadow-lg';
+          card.innerHTML = `
+            <div class="product-img-box shrink-0" onclick="openProductDetail('${p.id}')">
+              <img src="${mainImg}" alt="${p.name}" loading="lazy" onerror="this.src='https://driveparts.com.br/assets/marketplace/img/categories/motor.webp'">
+              <div class="absolute top-1 left-1 flex items-center gap-1">
+                <span class="bg-gringo-primary text-white text-[8px] font-black uppercase px-1 py-0.5 rounded shadow">
+                  -${discountPct}%
                 </span>
-                ${p.condition === 'usada_revisada' ? '<span class="bg-black/70 border border-white/20 text-slate-300 text-[8px] sm:text-[9px] uppercase font-bold px-1 sm:px-1.5 py-0.5 rounded">Revisada</span>' : ''}
+                ${p.condition === 'usada_revisada' ? '<span class="bg-black/80 border border-white/20 text-slate-300 text-[7px] uppercase font-bold px-1 py-0.5 rounded">Revisada</span>' : ''}
               </div>
             </div>
 
-            <div class="p-2 sm:p-3.5 space-y-1 sm:space-y-1.5">
-              <div class="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider font-heading">
-                <span class="truncate max-w-[65px] sm:max-w-none">${p.brand || 'Gringo'}</span>
-                <span class="text-emerald-400 font-bold whitespace-nowrap"><i class="fa-solid fa-circle-check text-[8px] sm:text-[9px]"></i> Estoque</span>
-              </div>
-
-              <h3 class="text-xs sm:text-sm font-bold text-white leading-snug line-clamp-2 cursor-pointer hover:text-gringo-primary transition h-8 sm:h-10" onclick="openProductDetail('${p.id}')" title="${p.name}">
-                ${p.name}
-              </h3>
-
-              <p class="text-[10px] sm:text-[11px] text-slate-400 truncate" title="${p.compatibility || ''}">
-                <i class="fa-solid fa-car-side text-slate-500 mr-1"></i>${p.compatibility || 'Consulte veículo'}
-              </p>
-
-              <div class="pt-1.5 border-t border-white/[0.06]">
-                <div class="text-[10px] sm:text-[11px] text-slate-500 line-through">${formatBrl(p.price)}</div>
-                <div class="flex items-baseline gap-1 sm:gap-1.5">
-                  <span class="text-sm sm:text-lg font-black text-gringo-primary font-heading">${formatBrl(pricePix)}</span>
-                  <span class="text-[9px] sm:text-[10px] text-emerald-400 font-bold uppercase">no PIX</span>
+            <div class="product-card-body flex-1 min-w-0 p-2 sm:p-3 flex flex-col justify-between">
+              <div class="space-y-1 min-w-0">
+                <div class="flex items-center justify-between text-[9px] text-slate-400 uppercase tracking-wider font-heading">
+                  <span class="truncate max-w-[120px] font-medium">${p.brand || 'Gringo'}</span>
+                  <span class="text-emerald-400 font-bold whitespace-nowrap text-[8px] flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Estoque</span>
                 </div>
-                <div class="text-[9px] sm:text-[10px] text-slate-400 truncate">ou 6x de ${formatBrl(p.price / 6)} s/ juros</div>
+
+                <h3 class="product-card-title cursor-pointer hover:text-gringo-primary transition leading-tight" onclick="openProductDetail('${p.id}')" title="${p.name}">
+                  ${p.name}
+                </h3>
+
+                <p class="text-[10px] text-slate-400 truncate flex items-center gap-1" title="${p.compatibility || ''}">
+                  <i class="fa-solid fa-car-side text-slate-500 shrink-0"></i>
+                  <span class="truncate">${p.compatibility || 'Consulte veículo'}</span>
+                </p>
+
+                <div class="flex items-baseline gap-2 pt-0.5">
+                  <span class="text-[10px] text-slate-500 line-through">${formatBrl(p.price)}</span>
+                  <span class="text-sm sm:text-base font-black text-gringo-primary font-heading leading-tight">${formatBrl(pricePix)}</span>
+                  <span class="text-[8px] text-emerald-400 font-bold uppercase">no PIX</span>
+                </div>
+              </div>
+
+              <div class="product-card-actions pt-2 border-t border-white/[0.06] flex items-center gap-1.5" onclick="event.stopPropagation()">
+                <button onclick="startPreCheckout('${p.id}')" class="flex-1 py-1.5 sm:py-2 bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1 shadow transition">
+                  <i class="fa-brands fa-whatsapp text-sm"></i> <span>Comprar</span>
+                </button>
+                <button onclick="addToCart('${p.id}')" title="Adicionar ao Carrinho" class="w-8 py-1.5 sm:py-2 bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.1] text-slate-200 hover:text-white rounded-lg flex items-center justify-center text-xs transition shrink-0">
+                  <i class="fa-solid fa-cart-plus"></i>
+                </button>
               </div>
             </div>
-          </div>
+          `;
+        } else {
+          // Modo Grade (2 Colunas estritamente contidas)
+          card.className = 'product-card-modern bg-[#0E121B] border border-white/[0.08] rounded-xl overflow-hidden group shadow-lg';
+          card.innerHTML = `
+            <div class="w-full min-w-0">
+              <div class="product-img-box" onclick="openProductDetail('${p.id}')">
+                <img src="${mainImg}" alt="${p.name}" loading="lazy" onerror="this.src='https://driveparts.com.br/assets/marketplace/img/categories/motor.webp'">
+                
+                <div class="absolute top-1.5 left-1.5 flex items-center gap-1">
+                  <span class="bg-gringo-primary text-white text-[9px] font-black uppercase px-1.5 py-0.5 rounded shadow">
+                    -${discountPct}% PIX
+                  </span>
+                  ${p.condition === 'usada_revisada' ? '<span class="bg-black/80 border border-white/20 text-slate-300 text-[8px] uppercase font-bold px-1 py-0.5 rounded">Revisada</span>' : ''}
+                </div>
+              </div>
 
-          <div class="p-2 sm:p-3.5 pt-0 flex gap-1.5">
-            <button onclick="startPreCheckout('${p.id}')" class="flex-1 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1.5 shadow transition">
-              <i class="fa-brands fa-whatsapp text-sm"></i> <span>Comprar</span>
-            </button>
-            <button onclick="addToCart('${p.id}')" title="Adicionar ao Carrinho" class="w-8 sm:w-9 py-2 sm:py-2.5 bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.1] text-slate-200 hover:text-white rounded-lg flex items-center justify-center text-xs transition shrink-0">
-              <i class="fa-solid fa-cart-plus"></i>
-            </button>
-          </div>
-        `;
+              <div class="p-2 sm:p-3 space-y-1 min-w-0">
+                <div class="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider font-heading">
+                  <span class="truncate max-w-[65px] sm:max-w-none font-medium">${p.brand || 'Gringo'}</span>
+                  <span class="text-emerald-400 font-bold whitespace-nowrap text-[8px] sm:text-[9px] flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Estoque</span>
+                </div>
+
+                <h3 class="product-card-title cursor-pointer hover:text-gringo-primary transition leading-tight" onclick="openProductDetail('${p.id}')" title="${p.name}">
+                  ${p.name}
+                </h3>
+
+                <p class="text-[10px] text-slate-400 truncate flex items-center gap-1" title="${p.compatibility || ''}">
+                  <i class="fa-solid fa-car-side text-slate-500 shrink-0"></i>
+                  <span class="truncate">${p.compatibility || 'Consulte veículo'}</span>
+                </p>
+
+                <div class="pt-1 border-t border-white/[0.06]">
+                  <div class="text-[10px] text-slate-500 line-through leading-none">${formatBrl(p.price)}</div>
+                  <div class="flex items-baseline gap-1 mt-0.5">
+                    <span class="text-sm sm:text-base font-black text-gringo-primary font-heading leading-tight">${formatBrl(pricePix)}</span>
+                    <span class="text-[9px] text-emerald-400 font-bold uppercase">no PIX</span>
+                  </div>
+                  <div class="text-[9px] text-slate-400 truncate mt-0.5">ou 6x de ${formatBrl(p.price / 6)} s/ juros</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-2 sm:p-3 pt-0 flex items-center gap-1.5" onclick="event.stopPropagation()">
+              <button onclick="startPreCheckout('${p.id}')" class="flex-1 py-2 bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1 shadow transition">
+                <i class="fa-brands fa-whatsapp text-sm"></i> <span>Comprar</span>
+              </button>
+              <button onclick="addToCart('${p.id}')" title="Adicionar ao Carrinho" class="w-8 py-2 bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.1] text-slate-200 hover:text-white rounded-lg flex items-center justify-center text-xs transition shrink-0">
+                <i class="fa-solid fa-cart-plus"></i>
+              </button>
+            </div>
+          `;
+        }
 
         grid.appendChild(card);
       });
