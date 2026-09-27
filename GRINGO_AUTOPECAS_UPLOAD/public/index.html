@@ -225,6 +225,126 @@
     </div>
   </section>
 
+  <!-- Equipe & Confiança Section (Pessoas Reais, Peças com Procedência) -->
+  <section id="equipeSection" class="py-4 sm:py-8 max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 w-full">
+    <div class="bg-[#0E121B] border border-white/[0.08] rounded-2xl p-4 sm:p-6 lg:p-8 shadow-2xl relative overflow-hidden">
+      <!-- Glow ambient background -->
+      <div class="absolute -top-32 -right-32 w-80 h-80 bg-gringo-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-gringo-blue/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-center relative z-10">
+        
+        <!-- Left: Team Photo Container -->
+        <div class="lg:col-span-6 w-full min-w-0">
+          <div class="equipe-photo-container relative w-full aspect-square sm:aspect-[4/3] lg:aspect-square rounded-xl overflow-hidden bg-black/60 border border-white/[0.1] shadow-2xl group">
+            <img 
+              src="/images/equipe-gringo.jpg" 
+              alt="Equipe Gringo Autopeças" 
+              class="equipe-photo-img w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+            >
+            
+            <!-- Bottom gradient for text readability -->
+            <div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none"></div>
+            
+            <!-- Floating Badge Over Photo -->
+            <div class="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-10 space-y-1">
+              <span class="inline-block bg-gringo-primary text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-md shadow-lg font-heading">
+                NOSSA EQUIPE
+              </span>
+              <p class="text-xs sm:text-sm font-bold text-white drop-shadow-md">
+                8 especialistas prontos para te atender
+              </p>
+              <div class="flex items-center gap-1.5 pt-0.5">
+                <span class="w-6 h-1 rounded-full bg-gringo-primary"></span>
+                <span class="w-2 h-1 rounded-full bg-white/40"></span>
+                <span class="w-2 h-1 rounded-full bg-white/40"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Real People, Trust & Contact -->
+        <div class="lg:col-span-6 w-full min-w-0 flex flex-col justify-between space-y-3 sm:space-y-4">
+          
+          <div>
+            <!-- Verification Tag -->
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gringo-primary/10 border border-gringo-primary/30 text-[11px] sm:text-xs font-bold text-gringo-primary uppercase tracking-wide">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>EMPRESA VERIFICADA • GRAVATAÍ/RS</span>
+            </div>
+
+            <!-- Title -->
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white font-heading leading-tight tracking-tight mt-2.5 sm:mt-3">
+              Pessoas reais,<br>
+              <span class="text-gringo-primary">peças com procedência</span>
+            </h2>
+
+            <!-- Paragraph -->
+            <p class="text-xs sm:text-sm lg:text-base text-slate-300 leading-relaxed mt-2.5 sm:mt-3">
+              Somos uma equipe de <strong class="text-white font-bold">8 especialistas</strong> apaixonados por automóveis. Cada peça é revisada, testada e aprovada antes de sair daqui. Você não compra de um robô — compra de quem entende e se importa.
+            </p>
+          </div>
+
+          <!-- Attendance Info Box -->
+          <div class="bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 sm:p-4 flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-gringo-primary/15 border border-gringo-primary/30 flex items-center justify-center shrink-0 mt-0.5 text-gringo-primary">
+              <i class="fa-solid fa-users text-sm"></i>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300 leading-snug">
+              <strong class="text-white font-bold">Nossa equipe</strong> atende de segunda a sábado — presencialmente em Gravataí/RS ou pelo WhatsApp, com resposta rápida.
+            </p>
+          </div>
+
+          <!-- Mini Info Grid (CNPJ & Contato) -->
+          <div class="grid grid-cols-2 gap-2.5 sm:gap-3">
+            <div class="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 sm:p-3 flex items-center gap-2.5 min-w-0">
+              <div class="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center shrink-0 text-slate-400">
+                <i class="fa-solid fa-building text-sm text-gringo-primary"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <span class="block text-[9px] uppercase font-bold text-slate-400 tracking-wider">CNPJ</span>
+                <span class="block text-[11px] sm:text-xs font-mono font-bold text-white truncate">02.592.687/0001-27</span>
+              </div>
+            </div>
+
+            <div class="bg-white/[0.02] border border-white/[0.06] rounded-xl p-2.5 sm:p-3 flex items-center gap-2.5 min-w-0">
+              <div class="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center shrink-0 text-slate-400">
+                <i class="fa-solid fa-phone text-sm text-emerald-400"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <span class="block text-[9px] uppercase font-bold text-slate-400 tracking-wider">CONTATO</span>
+                <span id="equipeContactPhone" class="block text-[11px] sm:text-xs font-mono font-bold text-white truncate">(51) 99368-7877</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CTAs -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 pt-1">
+            <a href="#catalogoSection" class="w-full py-3 sm:py-3.5 bg-gringo-primary hover:bg-gringo-primary-dark text-white font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-gringo-primary/25 transition">
+              <i class="fa-solid fa-bag-shopping"></i>
+              <span>COMPRAR AGORA</span>
+            </a>
+            
+            <a id="equipeWhatsappBtn" href="https://wa.me/5551993687877?text=Ol%C3%A1!%20Gostaria%20de%20falar%20com%20a%20equipe%20da%20Gringo%20Autope%C3%A7as." target="_blank" class="w-full py-3 sm:py-3.5 bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/40 text-emerald-400 hover:text-white font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition">
+              <i class="fa-brands fa-whatsapp text-base"></i>
+              <span>FALAR COM EQUIPE</span>
+            </a>
+          </div>
+
+          <!-- Security Badge Bar -->
+          <div class="p-2.5 sm:p-3 rounded-xl bg-emerald-500/[0.04] border border-emerald-500/20 flex items-center gap-2.5 text-slate-300">
+            <i class="fa-solid fa-shield-halved text-emerald-400 text-sm shrink-0"></i>
+            <span class="text-[10px] sm:text-xs leading-tight">
+              Empresa regular na Receita Federal • Procedência Comprovada • Compra 100% Segura
+            </span>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- Dynamic Catalog & Filters Section -->
   <section id="catalogoSection" class="py-4 sm:py-10 max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 flex-grow">
     
@@ -4679,7 +4799,14 @@
           
           if (json.address) document.getElementById('storeAddressText').innerText = json.address + '\nGravataí - RS';
           if (json.phone_landline) document.getElementById('storePhoneText').innerText = json.phone_landline;
-          if (json.whatsapp_number) document.getElementById('storeWhatsappText').innerText = json.whatsapp_number;
+          if (json.whatsapp_number) {
+            const storeWa = document.getElementById('storeWhatsappText');
+            if (storeWa) storeWa.innerText = json.whatsapp_number;
+            const eqPhone = document.getElementById('equipeContactPhone');
+            if (eqPhone) eqPhone.innerText = json.whatsapp_number;
+          }
+          const eqWa = document.getElementById('equipeWhatsappBtn');
+          if (eqWa) eqWa.href = `https://wa.me/55${currentStoreWhatsapp}?text=${encodeURIComponent('Olá! Gostaria de falar com a equipe de especialistas da Gringo Autopeças.')}`;
         }
       } catch (e) {
         console.warn('Erro ao carregar store-info:', e);
