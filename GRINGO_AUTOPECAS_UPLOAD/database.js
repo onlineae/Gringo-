@@ -3,7 +3,7 @@ const fs = require('fs');
 
 const defaultSettings = {
   admin_password: '4662',
-  whatsapp_number: '51993687877',
+  whatsapp_number: '5193448572',
   phone_landline: '5130475595',
   address: 'Rua Luciana de Abreu, 540 - Pda. 73 Frente ao Colégio Ponche Verde',
   city: 'Gravataí',

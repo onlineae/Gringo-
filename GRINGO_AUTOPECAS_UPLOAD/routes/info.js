@@ -9,7 +9,7 @@ router.get('/store-info', async (req, res) => {
     res.json({
       success: true,
       company_name: config.company_name || 'Gringo Autopeças',
-      whatsapp_number: config.whatsapp_number || '51993687877',
+      whatsapp_number: config.whatsapp_number || '5193448572',
       phone_landline: config.phone_landline || '5130475595',
       address: config.address || 'Rua Luciana de Abreu, 540 - Pda. 73 Frente ao Colégio Ponche Verde',
       city: config.city || 'Gravataí',

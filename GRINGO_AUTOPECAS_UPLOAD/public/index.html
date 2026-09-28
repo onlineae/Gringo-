@@ -104,7 +104,7 @@
           </button>
 
           <!-- WhatsApp Direct -->
-          <a id="navWhatsappBtn" href="https://wa.me/5551993687877" target="_blank" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm shadow-md transition">
+          <a id="navWhatsappBtn" href="https://wa.me/555193448572" target="_blank" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg font-bold text-xs sm:text-sm shadow-md transition">
             <i class="fa-brands fa-whatsapp text-sm sm:text-base"></i>
             <span class="hidden lg:inline">Falar com Vendedor</span>
           </a>
@@ -313,7 +313,7 @@
               </div>
               <div class="min-w-0 flex-1">
                 <span class="block text-[9px] uppercase font-bold text-slate-400 tracking-wider">CONTATO</span>
-                <span id="equipeContactPhone" class="block text-[11px] sm:text-xs font-mono font-bold text-white truncate">(51) 99368-7877</span>
+                <span id="equipeContactPhone" class="block text-[11px] sm:text-xs font-mono font-bold text-white truncate">(51) 9344-8572</span>
               </div>
             </div>
           </div>
@@ -325,7 +325,7 @@
               <span>COMPRAR AGORA</span>
             </a>
             
-            <a id="equipeWhatsappBtn" href="https://wa.me/5551993687877?text=Ol%C3%A1!%20Gostaria%20de%20falar%20com%20a%20equipe%20da%20Gringo%20Autope%C3%A7as." target="_blank" class="w-full py-3 sm:py-3.5 bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/40 text-emerald-400 hover:text-white font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition">
+            <a id="equipeWhatsappBtn" href="https://wa.me/555193448572?text=Ol%C3%A1!%20Gostaria%20de%20falar%20com%20a%20equipe%20da%20Gringo%20Autope%C3%A7as." target="_blank" class="w-full py-3 sm:py-3.5 bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/40 text-emerald-400 hover:text-white font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition">
               <i class="fa-brands fa-whatsapp text-base"></i>
               <span>FALAR COM EQUIPE</span>
             </a>
@@ -1027,7 +1027,7 @@
           </div>
           <p class="leading-relaxed">
             Fixo: <strong id="storePhoneText" class="text-white">(51) 3047.5595</strong><br>
-            WhatsApp: <strong id="storeWhatsappText" class="text-emerald-400">(51) 99368.7877</strong>
+            WhatsApp: <strong id="storeWhatsappText" class="text-emerald-400">(51) 9344.8572</strong>
           </p>
         </div>
 
@@ -1065,7 +1065,7 @@
   </footer>
 
   <!-- Floating WhatsApp Action -->
-  <a id="floatingWhatsappBtn" href="https://wa.me/5551993687877" target="_blank" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 bg-gradient-to-r from-emerald-600 to-green-500 text-white p-3 sm:p-4 rounded-full shadow-2xl shadow-emerald-900/60 hover:scale-110 transition duration-300 flex items-center justify-center">
+  <a id="floatingWhatsappBtn" href="https://wa.me/555193448572" target="_blank" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 bg-gradient-to-r from-emerald-600 to-green-500 text-white p-3 sm:p-4 rounded-full shadow-2xl shadow-emerald-900/60 hover:scale-110 transition duration-300 flex items-center justify-center">
     <i class="fa-brands fa-whatsapp text-xl sm:text-3xl"></i>
     <span class="absolute -top-1 -right-1 flex h-3 w-3 sm:h-3.5 sm:w-3.5">
       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -5222,7 +5222,7 @@
     let currentSort = 'relevance';
     let searchQuery = '';
     let cart = JSON.parse(localStorage.getItem('gringo_cart') || '[]');
-    let currentStoreWhatsapp = '51993687877';
+    let currentStoreWhatsapp = '5193448572';
     let activePreCheckoutProduct = null;
     let visibleLimit = 24;
     let currentViewMode = localStorage.getItem('gringo_view_mode') || 'grid';
@@ -5238,7 +5238,7 @@
         const res = await fetch('/api/info/store-info');
         const json = await res.json();
         if (json.success) {
-          currentStoreWhatsapp = (json.whatsapp_number || '51993687877').replace(/\D/g, '');
+          currentStoreWhatsapp = (json.whatsapp_number || '5193448572').replace(/\D/g, '');
           const waUrl = `https://wa.me/55${currentStoreWhatsapp}?text=${encodeURIComponent('Olá! Vim pelo catálogo da Gringo Autopeças e gostaria de consultar disponibilidade de peças.')}`;
           document.getElementById('navWhatsappBtn').href = waUrl;
           document.getElementById('floatingWhatsappBtn').href = waUrl;

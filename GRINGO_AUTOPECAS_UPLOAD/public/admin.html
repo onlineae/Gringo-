@@ -398,7 +398,7 @@
           <label class="block text-xs font-bold text-emerald-400 mb-1">
             <i class="fa-brands fa-whatsapp text-sm mr-1"></i> WhatsApp Business da Empresa:
           </label>
-          <input type="text" id="settingWhatsapp" placeholder="Ex: 51993687877 (com DDD)" required class="w-full bg-slate-900 border border-emerald-600/60 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+          <input type="text" id="settingWhatsapp" placeholder="Ex: 5193448572 (com DDD)" required class="w-full bg-slate-900 border border-emerald-600/60 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
           <span class="text-[10px] text-slate-400 mt-1 block">Assim que a equipe passar o novo número, basta alterá-lo aqui para atualizar os botões de todo o site.</span>
         </div>
 
@@ -881,7 +881,7 @@
         });
         const json = await res.json();
         if (json.success && json.settings) {
-          document.getElementById('settingWhatsapp').value = json.settings.whatsapp_number || '51993687877';
+          document.getElementById('settingWhatsapp').value = json.settings.whatsapp_number || '5193448572';
           document.getElementById('settingPhone').value = json.settings.phone_landline || '5130475595';
           document.getElementById('settingAddress').value = json.settings.address || '';
         }
