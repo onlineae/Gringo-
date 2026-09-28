@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { dbHelpers } = require('../database');
 
-// Informações públicas da loja (contato, endereço, WhatsApp configurado)
-router.get('/store-info', (req, res) => {
+// Informações públicas da loja diretamente do servidor
+router.get('/store-info', async (req, res) => {
   try {
-    const config = dbHelpers.getAllSettings();
+    const config = await dbHelpers.getAllSettings();
     res.json({
       success: true,
       company_name: config.company_name || 'Gringo Autopeças',
@@ -16,7 +16,7 @@ router.get('/store-info', (req, res) => {
       state: config.state || 'RS'
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'Erro ao obter informações da loja.' });
+    res.status(500).json({ success: false, error: 'Erro ao obter informações da loja no servidor.' });
   }
 });
 

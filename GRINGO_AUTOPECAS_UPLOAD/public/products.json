@@ -13,6 +13,12 @@
       "img": "https://media.base44.com/images/public/6a0b16344ccd08b4f76d5e7d/840f82ec3_generated_image.png"
     },
     {
+      "id": "fueltech",
+      "name": "FuelTech",
+      "icon": "🏁",
+      "img": "/images/products/fueltech_ft450_1.jpg"
+    },
+    {
       "id": "alternadores",
       "name": "Alternadores",
       "icon": "⚡",
@@ -53,12 +59,6 @@
       "name": "Módulos",
       "icon": "💾",
       "img": "https://gt77.com.br/assets/marketplace/img/categories/modulo.webp"
-    },
-    {
-      "id": "fueltech",
-      "name": "FuelTech",
-      "icon": "🏁",
-      "img": "https://images.tcdn.com.br/img/img_prod/475985/ft700plus_3640_1_3926ffa25347ad20760a64026dc6aaf0.jpg"
     },
     {
       "id": "freios",
@@ -110,6 +110,85 @@
     }
   ],
   "products": [
+    {
+      "id": "ft450_chicote_real",
+      "name": "FuelTech FT450 + Chicote Completo",
+      "category": "fueltech",
+      "price": 4055,
+      "price_pix": 4055,
+      "image_url": "/images/products/fueltech_ft450_1.jpg",
+      "extra_images": [
+        "/images/products/fueltech_ft450_2.jpg",
+        "/images/products/fueltech_ft450_3.jpg"
+      ],
+      "compatibility": "Universal (Motores 1 a 12 cil, Aspirados e Turbo)",
+      "brand": "FuelTech",
+      "rating": 5,
+      "review_count": 52,
+      "sold_count": 140,
+      "in_stock": true,
+      "featured": true,
+      "condition": "nova",
+      "description": "Módulo de injeção programável FuelTech FT450 novo na caixa original, acompanhado de chicote elétrico completo. Painel touchscreen colorido de 4.3 pol, controle de injeção e ignição sequencial, boost controller integrado e datalogger de alta velocidade."
+    },
+    {
+      "id": "ft400_chicote_real",
+      "name": "FuelTech FT400 + Chicote Completo",
+      "category": "fueltech",
+      "price": 3755,
+      "price_pix": 3755,
+      "image_url": "/images/products/fueltech_ft400_1.jpg",
+      "extra_images": [
+        "/images/products/fueltech_ft400_2.jpg"
+      ],
+      "compatibility": "Universal (Motores 1 a 12 cil)",
+      "brand": "FuelTech",
+      "rating": 5,
+      "review_count": 38,
+      "sold_count": 95,
+      "in_stock": true,
+      "featured": true,
+      "condition": "nova",
+      "description": "Injeção eletrônica programável FuelTech FT400 completa na caixa com chicote elétrico novo. Display touchscreen colorido, controle de arrancada (2-step), controle de tração, datalogger integrado e ajuste mapa por mapa."
+    },
+    {
+      "id": "ft300_chicote_real",
+      "name": "FuelTech FT300 + Chicote Completo",
+      "category": "fueltech",
+      "price": 2399,
+      "price_pix": 2399,
+      "image_url": "/images/products/fueltech_ft300_1.jpg",
+      "extra_images": [
+        "/images/products/fueltech_ft300_2.jpg"
+      ],
+      "compatibility": "Universal (Motores 1 a 8 cil, Aspirados e Turbo)",
+      "brand": "FuelTech",
+      "rating": 4.9,
+      "review_count": 44,
+      "sold_count": 112,
+      "in_stock": true,
+      "featured": true,
+      "condition": "nova",
+      "description": "Módulo de injeção eletrônica FuelTech FT300 na caixa original com chicote elétrico completo, capa protetora FuelTech e cartela de adesivos originais. Display gráfico integrado para ajuste em tempo real sem necessidade de computador."
+    },
+    {
+      "id": "nanopro_poschave_real",
+      "name": "FuelTech NanoPRO (Já com Pós Chave)",
+      "category": "fueltech",
+      "price": 1147,
+      "price_pix": 1147,
+      "image_url": "/images/products/fueltech_nanopro_1.jpg",
+      "extra_images": [],
+      "compatibility": "Universal (Sondas Banda Larga Bosch 4.2 / 4.9)",
+      "brand": "FuelTech",
+      "rating": 4.9,
+      "review_count": 31,
+      "sold_count": 85,
+      "in_stock": true,
+      "featured": true,
+      "condition": "nova",
+      "description": "Leitor e condicionador de sonda lambda FuelTech NanoPRO novo na caixa, fiação já adaptada com pós chave para instalação limpa e segura. Tela touchscreen de 2 pol com leitura precisa de lambda e temperatura em tempo real via rede CAN."
+    },
     {
       "id": "volante_golf_gte_personalizado",
       "name": "Volante GOLF GTE Personalizado",

@@ -2,20 +2,20 @@ const express = require('express');
 const router = express.Router();
 const { dbHelpers } = require('../database');
 
-// Rastreamento público
-router.get('/:code', (req, res) => {
+// Rastreamento público (consulta direta no servidor)
+router.get('/:code', async (req, res) => {
   try {
     const code = req.params.code;
     if (!code || code.trim().length === 0) {
       return res.status(400).json({ success: false, error: 'Código de rastreamento não fornecido.' });
     }
 
-    const orderData = dbHelpers.getOrderByTrackingCode(code);
+    const orderData = await dbHelpers.getOrderByTrackingCode(code);
 
     if (!orderData) {
       return res.status(404).json({
         success: false,
-        error: 'Código de rastreamento não localizado. Verifique os dígitos e tente novamente.'
+        error: 'Código de rastreamento não localizado no sistema. Verifique os dígitos e tente novamente.'
       });
     }
 
@@ -32,8 +32,8 @@ router.get('/:code', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Erro na consulta de rastreio:', error);
-    res.status(500).json({ success: false, error: 'Erro interno ao consultar rastreio.' });
+    console.error('Erro na consulta de rastreio no servidor:', error);
+    res.status(500).json({ success: false, error: 'Erro interno ao consultar rastreio no servidor.' });
   }
 });
 

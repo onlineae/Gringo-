@@ -137,15 +137,24 @@
       </div>
 
       <!-- Action Bar -->
-      <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 bg-gringo-card border border-gringo-border p-4 rounded-xl">
-        <div class="flex items-center gap-3">
-          <h2 class="text-lg font-bold text-white font-heading">Gestão de Envios & Rastreamentos</h2>
+      <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-gringo-card border border-gringo-border p-4 rounded-xl">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          <h2 class="text-base sm:text-lg font-bold text-white font-heading">Gestão de Envios & Rastreamentos</h2>
           <span id="orderCountBadge" class="bg-slate-800 text-slate-300 text-xs px-2.5 py-0.5 rounded-full font-bold">0 cadastrados</span>
+          <span id="dbTypeBadge" class="bg-emerald-950/60 text-emerald-400 border border-emerald-700/50 text-[11px] px-2.5 py-0.5 rounded-full font-semibold flex items-center gap-1.5">
+            <i class="fa-solid fa-server"></i> Servidor Online
+          </span>
         </div>
 
-        <button onclick="openNewOrderModal()" class="bg-gradient-to-r from-gringo-orange to-gringo-orange-dark hover:from-gringo-orange-light hover:to-gringo-orange text-white font-bold px-4 py-2.5 rounded-lg text-sm shadow-md flex items-center justify-center gap-2 transition">
-          <i class="fa-solid fa-plus"></i> Cadastrar Novo Envio
-        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="loadOrders()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer" title="Recarregar Dados do Servidor">
+            <i class="fa-solid fa-arrows-rotate text-gringo-blue-light" id="refreshBtn"></i> <span>Atualizar Lista</span>
+          </button>
+
+          <button onclick="openNewOrderModal()" class="bg-gradient-to-r from-gringo-orange to-gringo-orange-dark hover:from-gringo-orange-light hover:to-gringo-orange text-white font-bold px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition cursor-pointer">
+            <i class="fa-solid fa-plus"></i> <span>Novo Envio</span>
+          </button>
+        </div>
       </div>
 
       <!-- Search & Filters -->
@@ -171,9 +180,16 @@
         </select>
       </div>
 
-      <!-- Orders Table -->
-      <div class="bg-gringo-card border border-gringo-border rounded-2xl overflow-hidden shadow-xl">
-        <div class="overflow-x-auto">
+      <!-- Orders Container (Table on Desktop, Cards on Mobile) -->
+      <div class="bg-gringo-card border border-gringo-border rounded-2xl overflow-hidden shadow-xl p-0">
+        
+        <!-- Mobile Cards List (Visible on screens < 768px) -->
+        <div id="ordersMobileList" class="md:hidden divide-y divide-slate-800/80 p-2 sm:p-3 space-y-2.5">
+          <!-- Gerado via JavaScript -->
+        </div>
+
+        <!-- Desktop Table (Visible on md and up) -->
+        <div class="hidden md:block overflow-x-auto">
           <table class="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>
               <tr class="bg-slate-900/90 border-b border-gringo-border text-slate-400 font-bold uppercase text-[11px] tracking-wider">
@@ -195,8 +211,8 @@
         <!-- Empty State -->
         <div id="emptyOrdersNotice" class="hidden text-center py-12 text-slate-400">
           <i class="fa-solid fa-box-open text-4xl mb-3 text-slate-600"></i>
-          <p class="font-semibold">Nenhum envio cadastrado ainda.</p>
-          <p class="text-xs text-slate-500 mt-1">Clique em "Cadastrar Novo Envio" para gerar o primeiro rastreio.</p>
+          <p class="font-semibold text-white">Nenhum envio cadastrado ainda.</p>
+          <p class="text-xs text-slate-500 mt-1">Clique em "Novo Envio" para gerar o primeiro rastreio.</p>
         </div>
       </div>
 
@@ -415,7 +431,7 @@
 
   <!-- Scripts -->
   <script>
-    let adminToken = sessionStorage.getItem('gringoAdminToken') || '';
+    let adminToken = localStorage.getItem('gringoAdminToken') || sessionStorage.getItem('gringoAdminToken') || '';
     let cachedOrders = [];
 
     // Formatar data em PT-BR (Horário Oficial de Brasília)
@@ -463,6 +479,7 @@
 
         if (json.success) {
           adminToken = json.token;
+          localStorage.setItem('gringoAdminToken', adminToken);
           sessionStorage.setItem('gringoAdminToken', adminToken);
           showAdminDashboard();
         } else {
@@ -476,6 +493,7 @@
     }
 
     function handleLogout() {
+      localStorage.removeItem('gringoAdminToken');
       sessionStorage.removeItem('gringoAdminToken');
       adminToken = '';
       document.getElementById('adminLayout').classList.add('hidden');
@@ -522,8 +540,11 @@
       }
     }
 
-    // Carregar Pedidos
+    // Carregar Pedidos Diretamente do Servidor Central (Sincronizado para todos os dispositivos)
     async function loadOrders() {
+      const refreshBtn = document.getElementById('refreshBtn');
+      if (refreshBtn) refreshBtn.classList.add('animate-spin');
+
       try {
         const res = await fetch('/api/admin/orders', {
           headers: { 'x-admin-password': adminToken }
@@ -539,9 +560,20 @@
           cachedOrders = json.orders || [];
           renderOrdersTable(cachedOrders);
           updateStats(cachedOrders);
+
+          if (json.database && json.database.type) {
+            const badge = document.getElementById('dbTypeBadge');
+            if (badge) {
+              badge.innerHTML = `<i class="fa-solid fa-server"></i> ${json.database.type}`;
+            }
+          }
         }
       } catch (err) {
-        console.error('Erro ao carregar envios:', err);
+        console.error('Erro ao carregar envios do servidor:', err);
+      } finally {
+        if (refreshBtn) {
+          setTimeout(() => refreshBtn.classList.remove('animate-spin'), 400);
+        }
       }
     }
 
@@ -558,10 +590,13 @@
       document.getElementById('statTransit').innerText = transit;
     }
 
+    // Renderiza a Lista para Desktop (Tabela) e Mobile (Cards Individuais)
     function renderOrdersTable(orders) {
       const tbody = document.getElementById('ordersTableBody');
+      const mobileList = document.getElementById('ordersMobileList');
       const emptyNotice = document.getElementById('emptyOrdersNotice');
       tbody.innerHTML = '';
+      mobileList.innerHTML = '';
 
       if (orders.length === 0) {
         emptyNotice.classList.remove('hidden');
@@ -570,9 +605,6 @@
       emptyNotice.classList.add('hidden');
 
       orders.forEach(order => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-900/60 transition';
-
         let badgeColor = 'bg-gringo-blue/20 text-gringo-blue-light border-gringo-blue/30';
         const s = (order.status || '').toLowerCase();
         if (s.includes('separação')) {
@@ -583,6 +615,14 @@
           badgeColor = 'bg-emerald-950/60 text-emerald-400 border-emerald-700';
         }
 
+        const cleanPhone = (order.customer_phone || '').replace(/\D/g, '');
+        const trackingUrl = `${window.location.origin}/rastreio?codigo=${order.tracking_code}`;
+        const whatsappMsg = encodeURIComponent(`Olá ${order.customer_name}! Seu pedido na Gringo Autopeças está com código de rastreamento: ${order.tracking_code}.\nAcompanhe a entrega pelo link oficial: ${trackingUrl}`);
+        const whatsappLink = cleanPhone ? `https://wa.me/55${cleanPhone}?text=${whatsappMsg}` : null;
+
+        // 1. LINHA PARA DESKTOP
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-900/60 transition';
         tr.innerHTML = `
           <td class="py-3.5 px-4 font-mono font-bold text-white whitespace-nowrap">
             <div class="flex items-center gap-1.5">
@@ -593,8 +633,17 @@
             </div>
           </td>
           <td class="py-3.5 px-4">
-            <strong class="text-white block">${order.customer_name}</strong>
-            <span class="text-xs text-slate-400">${order.customer_phone || 'Sem telefone'}</span>
+            <div class="flex items-center gap-2">
+              <div>
+                <strong class="text-white block">${order.customer_name}</strong>
+                <span class="text-xs text-slate-400">${order.customer_phone || 'Sem telefone'}</span>
+              </div>
+              ${whatsappLink ? `
+                <a href="${whatsappLink}" target="_blank" class="p-1 bg-emerald-600/30 hover:bg-emerald-600 border border-emerald-500/40 text-emerald-400 hover:text-white rounded text-xs transition" title="Enviar Código no WhatsApp do Cliente">
+                  <i class="fa-brands fa-whatsapp"></i>
+                </a>
+              ` : ''}
+            </div>
           </td>
           <td class="py-3.5 px-4 text-slate-300">
             <div>${order.city} / ${order.state}</div>
@@ -627,6 +676,60 @@
           </td>
         `;
         tbody.appendChild(tr);
+
+        // 2. CARD RESPONSIVO PARA SMARTPHONES (NUNCA CORTA NA TELA DO CELULAR)
+        const card = document.createElement('div');
+        card.className = 'bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 space-y-3 shadow-md hover:border-slate-700 transition';
+        card.innerHTML = `
+          <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-bold text-white text-sm sm:text-base">${order.tracking_code}</span>
+              <button onclick="copyTrackingLink('${order.tracking_code}')" class="text-slate-400 hover:text-gringo-orange p-1" title="Copiar Link de Rastreio">
+                <i class="fa-regular fa-copy"></i>
+              </button>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${badgeColor}">
+              ${order.status}
+            </span>
+          </div>
+
+          <div class="space-y-2 text-xs text-slate-300">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <strong class="text-white text-sm block">${order.customer_name}</strong>
+                <span class="text-slate-400">${order.city} / ${order.state} &bull; CEP ${order.cep}</span>
+              </div>
+              ${whatsappLink ? `
+                <a href="${whatsappLink}" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition shrink-0 shadow">
+                  <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+                </a>
+              ` : ''}
+            </div>
+
+            <div class="bg-slate-950/70 rounded-lg p-2.5 border border-slate-800/80">
+              <div class="text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">Peças / Conteúdo:</div>
+              <div class="text-slate-200">${order.items_description || 'Peças Automotivas'}</div>
+            </div>
+
+            <div class="text-[11px] text-slate-400 flex items-center justify-between pt-0.5">
+              <span>Registro: <strong class="text-slate-300">${formatDateBr(order.created_at)}</strong></span>
+              <span class="text-[10px] text-slate-500 font-mono">Brasília</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800">
+            <button onclick="openUpdateStatusModal(${order.id}, '${order.tracking_code}', '${order.status}')" class="py-2 bg-gringo-blue/20 hover:bg-gringo-blue border border-gringo-blue/40 text-gringo-blue-light hover:text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-arrows-rotate"></i> Status
+            </button>
+            <a href="/rastreio?codigo=${order.tracking_code}" target="_blank" class="py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 text-center">
+              <i class="fa-solid fa-eye"></i> Rastrear
+            </a>
+            <button onclick="deleteOrder(${order.id})" class="py-2 bg-red-950/40 hover:bg-red-800 text-red-400 hover:text-white rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+              <i class="fa-regular fa-trash-can"></i> Excluir
+            </button>
+          </div>
+        `;
+        mobileList.appendChild(card);
       });
     }
 
