@@ -5256,21 +5256,19 @@
         const res = await fetch('/api/info/store-info');
         const json = await res.json();
         if (json.success) {
-          currentStoreWhatsapp = (json.whatsapp_number || '5193448572').replace(/\D/g, '');
-          const waUrl = `https://wa.me/55${currentStoreWhatsapp}?text=${encodeURIComponent('Olá! Vim pelo catálogo da Gringo Autopeças e gostaria de consultar disponibilidade de peças.')}`;
+          currentStoreWhatsapp = '5193448572';
+          const waUrl = `https://wa.me/555193448572?text=${encodeURIComponent('Olá! Vim pelo catálogo da Gringo Autopeças e gostaria de consultar disponibilidade de peças.')}`;
           document.getElementById('navWhatsappBtn').href = waUrl;
           document.getElementById('floatingWhatsappBtn').href = waUrl;
           
           if (json.address) document.getElementById('storeAddressText').innerText = json.address + '\nGravataí - RS';
           if (json.phone_landline) document.getElementById('storePhoneText').innerText = json.phone_landline;
-          if (json.whatsapp_number) {
-            const storeWa = document.getElementById('storeWhatsappText');
-            if (storeWa) storeWa.innerText = json.whatsapp_number;
-            const eqPhone = document.getElementById('equipeContactPhone');
-            if (eqPhone) eqPhone.innerText = json.whatsapp_number;
-          }
+          const storeWa = document.getElementById('storeWhatsappText');
+          if (storeWa) storeWa.innerText = '(51) 9344.8572';
+          const eqPhone = document.getElementById('equipeContactPhone');
+          if (eqPhone) eqPhone.innerText = '(51) 9344-8572';
           const eqWa = document.getElementById('equipeWhatsappBtn');
-          if (eqWa) eqWa.href = `https://wa.me/55${currentStoreWhatsapp}?text=${encodeURIComponent('Olá! Gostaria de falar com a equipe de especialistas da Gringo Autopeças.')}`;
+          if (eqWa) eqWa.href = `https://wa.me/555193448572?text=${encodeURIComponent('Olá! Gostaria de falar com a equipe de especialistas da Gringo Autopeças.')}`;
         }
       } catch (e) {
         console.warn('Erro ao carregar store-info:', e);

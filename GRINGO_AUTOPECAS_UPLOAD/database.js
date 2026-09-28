@@ -82,7 +82,7 @@ async function initDb() {
 
       for (const [key, value] of Object.entries(defaultSettings)) {
         await pgPool.query(
-          'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING',
+          'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value',
           [key, value]
         );
       }
@@ -127,12 +127,9 @@ async function initDb() {
         );
       `);
 
-      const getStmt = sqliteDb.prepare('SELECT value FROM settings WHERE key = ?');
       const setStmt = sqliteDb.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)');
       for (const [key, value] of Object.entries(defaultSettings)) {
-        if (!getStmt.get(key)) {
-          setStmt.run(key, value);
-        }
+        setStmt.run(key, value);
       }
     } catch (err) {
       console.error('❌ [Servidor] Erro ao inicializar SQLite:', err);
